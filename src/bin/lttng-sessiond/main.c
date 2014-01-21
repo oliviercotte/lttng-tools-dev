@@ -3037,6 +3037,7 @@ skip_domain:
 	{
 		struct lttng_event_exclusion *exclusion = NULL;
 		struct lttng_filter_bytecode *bytecode = NULL;
+		char *filter_expression = NULL;
 
 		/* Handle exclusion events and receive it from the client. */
 		if (cmd_ctx->lsm->u.enable.exclusion_count > 0) {
@@ -3058,6 +3059,38 @@ skip_domain:
 				*sock_error = 1;
 				free(exclusion);
 				ret = LTTNG_ERR_EXCLUSION_INVAL;
+				goto error;
+			}
+		}
+
+		/* Get filter expression from client. */
+		if (cmd_ctx->lsm->u.enable.expression_len > 0) {
+			size_t expression_len =
+				cmd_ctx->lsm->u.enable.expression_len;
+
+			if (expression_len > LTTNG_FILTER_MAX_LEN) {
+				ret = LTTNG_ERR_FILTER_INVAL;
+				free(exclusion);
+				goto error;
+			}
+
+			filter_expression = zmalloc(expression_len);
+			if (!filter_expression) {
+				free(exclusion);
+				ret = LTTNG_ERR_FILTER_NOMEM;
+				goto error;
+			}
+
+			/* Receive var. len. data */
+			DBG("Receiving var len filter's expression from client ...");
+			ret = lttcomm_recv_unix_sock(sock, filter_expression,
+				expression_len);
+			if (ret <= 0) {
+				DBG("Nothing recv() from client car len data... continuing");
+				*sock_error = 1;
+				free(filter_expression);
+				free(exclusion);
+				ret = LTTNG_ERR_FILTER_INVAL;
 				goto error;
 			}
 		}
@@ -3101,7 +3134,8 @@ skip_domain:
 
 		ret = cmd_enable_event(cmd_ctx->session, &cmd_ctx->lsm->domain,
 				cmd_ctx->lsm->u.enable.channel_name,
-				&cmd_ctx->lsm->u.enable.event, bytecode, exclusion,
+				&cmd_ctx->lsm->u.enable.event,
+				filter_expression, bytecode, exclusion,
 				kernel_poll_pipe[1]);
 		break;
 	}
@@ -3111,7 +3145,8 @@ skip_domain:
 
 		ret = cmd_enable_event_all(cmd_ctx->session, &cmd_ctx->lsm->domain,
 				cmd_ctx->lsm->u.enable.channel_name,
-				cmd_ctx->lsm->u.enable.event.type, NULL, kernel_poll_pipe[1]);
+				cmd_ctx->lsm->u.enable.event.type, NULL, NULL,
+				kernel_poll_pipe[1]);
 		break;
 	}
 	case LTTNG_LIST_TRACEPOINTS:
