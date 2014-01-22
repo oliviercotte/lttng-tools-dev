@@ -117,7 +117,10 @@ static void usage(FILE *ofp)
 	fprintf(ofp, "    view              Start trace viewer\n");
 	fprintf(ofp, "    save              Save session configuration\n");
 <<<<<<< HEAD
+<<<<<<< HEAD
 	fprintf(ofp, "    load              Load session configuration\n");
+=======
+>>>>>>> 79a9e3d... Add a save command based on the save API to the lttng client
 =======
 >>>>>>> 79a9e3d... Add a save command based on the save API to the lttng client
 	fprintf(ofp, "\n");
