@@ -27,7 +27,7 @@ config.status
 stamp-h1
 libtool
 tags
-
+TAGS
 # m4 macros not automatically generated
 config/
 !config/epoll.m4
