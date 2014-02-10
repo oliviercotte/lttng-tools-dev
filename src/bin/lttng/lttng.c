@@ -116,13 +116,7 @@ static void usage(FILE *ofp)
 	fprintf(ofp, "    version           Show version information\n");
 	fprintf(ofp, "    view              Start trace viewer\n");
 	fprintf(ofp, "    save              Save session configuration\n");
-<<<<<<< HEAD
-<<<<<<< HEAD
 	fprintf(ofp, "    load              Load session configuration\n");
-=======
->>>>>>> 79a9e3d... Add a save command based on the save API to the lttng client
-=======
->>>>>>> 79a9e3d... Add a save command based on the save API to the lttng client
 	fprintf(ofp, "\n");
 	fprintf(ofp, "Each command also has its own -h, --help option.\n");
 	fprintf(ofp, "\n");
