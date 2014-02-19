@@ -26,5 +26,7 @@
 int index_create_file(char *path_name, char *stream_name, int uid, int gid,
 		uint64_t size, uint64_t count);
 ssize_t index_write(int fd, struct ctf_packet_index *index, size_t len);
+int index_open(const char *path_name, const char *channel_name,
+		uint64_t tracefile_count, uint64_t tracefile_count_current);
 
 #endif /* _INDEX_H */

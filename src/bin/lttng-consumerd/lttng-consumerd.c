@@ -79,6 +79,8 @@ struct health_app *health_consumerd;
 
 const char *tracing_group_name = DEFAULT_TRACING_GROUP;
 
+int lttng_consumer_ready = NR_LTTNG_CONSUMER_READY;
+
 enum lttng_consumer_type lttng_consumer_get_type(void)
 {
 	if (!ctx) {
@@ -339,7 +341,13 @@ int main(int argc, char **argv)
 	}
 
 	/* Init */
-	lttng_consumer_init();
+	if (lttng_consumer_init() < 0) {
+		goto error;
+	}
+
+	/* Init socket timeouts */
+	lttcomm_init();
+	lttcomm_inet_init();
 
 	if (!getuid()) {
 		/* Set limit for open files */
@@ -400,9 +408,6 @@ int main(int argc, char **argv)
 
 	ctx->type = opt_type;
 
-	/* Initialize communication library */
-	lttcomm_init();
-
 	ret = utils_create_pipe(health_quit_pipe);
 	if (ret < 0) {
 		goto error_health_pipe;
@@ -415,6 +420,15 @@ int main(int argc, char **argv)
 		PERROR("pthread_create health");
 		goto health_error;
 	}
+
+	/*
+	 * Wait for health thread to be initialized before letting the
+	 * sessiond thread reply to the sessiond that we are ready.
+	 */
+	while (uatomic_read(&lttng_consumer_ready)) {
+		usleep(100000);
+	}
+	cmm_smp_mb();	/* Read ready before following operations */
 
 	/* Create thread to manage channels */
 	ret = pthread_create(&channel_thread, NULL, consumer_thread_channel_poll,

@@ -16,6 +16,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 SESSIOND_BIN="lttng-sessiond"
+CONSUMERD_BIN="lttng-consumerd"
 RELAYD_BIN="lttng-relayd"
 LTTNG_BIN="lttng"
 BABELTRACE_BIN="babeltrace"
@@ -107,7 +108,7 @@ function start_lttng_relayd
 	DIR=$(readlink -f $TESTDIR)
 
 	if [ -z $(pidof lt-$RELAYD_BIN) ]; then
-		$DIR/../src/bin/lttng-relayd/$RELAYD_BIN $opt >/dev/null 2>&1 &
+		$DIR/../src/bin/lttng-relayd/$RELAYD_BIN -b $opt >/dev/null 2>&1
 		#$DIR/../src/bin/lttng-relayd/$RELAYD_BIN $opt -vvv >>/tmp/relayd.log 2>&1 &
 		if [ $? -eq 1 ]; then
 			fail "Start lttng-relayd (opt: $opt)"
@@ -120,22 +121,33 @@ function start_lttng_relayd
 	fi
 }
 
-function stop_lttng_relayd
+function stop_lttng_relayd_nocheck
 {
 	PID_RELAYD=`pidof lt-$RELAYD_BIN`
 
+	diag "Killing lttng-relayd (pid: $PID_RELAYD)"
 	kill $PID_RELAYD >/dev/null 2>&1
+	retval=$?
 
-	if [ $? -eq 1 ]; then
-		fail "Kill lttng-relayd (pid: $PID_RELAYD)"
-		return 1
-	else
+	if [ $retval -eq 1 ]; then
 		out=1
 		while [ -n "$out" ]; do
 			out=$(pidof lt-$RELAYD_BIN)
 			sleep 0.5
 		done
-		pass "Kill lttng-relayd (pid: $PID_RELAYD)"
+	fi
+	return $retval
+}
+
+function stop_lttng_relayd
+{
+	stop_lttng_relayd_nocheck
+
+	if [ $? -eq 1 ]; then
+		fail "Killed lttng-relayd (pid: $PID_RELAYD)"
+		return 1
+	else
+		pass "Killed lttng-relayd (pid: $PID_RELAYD)"
 		return 0
 	fi
 }
@@ -156,7 +168,7 @@ function start_lttng_sessiond()
 	DIR=$(readlink -f $TESTDIR)
 
 	if [ -z $(pidof lt-$SESSIOND_BIN) ]; then
-		$DIR/../src/bin/lttng-sessiond/$SESSIOND_BIN --daemonize --consumerd32-path="$DIR/../src/bin/lttng-consumerd/lttng-consumerd" --consumerd64-path="$DIR/../src/bin/lttng-consumerd/lttng-consumerd"
+		$DIR/../src/bin/lttng-sessiond/$SESSIOND_BIN --background --consumerd32-path="$DIR/../src/bin/lttng-consumerd/lttng-consumerd" --consumerd64-path="$DIR/../src/bin/lttng-consumerd/lttng-consumerd"
 		#$DIR/../src/bin/lttng-sessiond/$SESSIOND_BIN --consumerd32-path="$DIR/../src/bin/lttng-consumerd/lttng-consumerd" --consumerd64-path="$DIR/../src/bin/lttng-consumerd/lttng-consumerd" --verbose-consumer >>/tmp/sessiond.log 2>&1 &
 		status=$?
 		ok $status "Start session daemon"
@@ -181,6 +193,11 @@ function stop_lttng_sessiond ()
 		out=1
 		while [ -n "$out" ]; do
 			out=$(pidof lt-$SESSIOND_BIN)
+			sleep 0.5
+		done
+		out=1
+		while [ -n "$out" ]; do
+			out=$(pidof $CONSUMERD_BIN)
 			sleep 0.5
 		done
 		pass "Kill session daemon"
@@ -272,6 +289,24 @@ function enable_jul_lttng_event()
 
 	$TESTDIR/../src/bin/lttng/$LTTNG_BIN enable-event "$event_name" $chan -s $sess_name -j >/dev/null 2>&1
 	ok $? "Enable JUL event $event_name for session $sess_name"
+}
+
+function enable_jul_lttng_event_loglevel()
+{
+	sess_name=$1
+	event_name="$2"
+	loglevel=$3
+	channel_name=$4
+
+	if [ -z $channel_name ]; then
+		# default channel if none specified
+		chan=""
+	else
+		chan="-c $channel_name"
+	fi
+
+	$TESTDIR/../src/bin/lttng/$LTTNG_BIN enable-event --loglevel $loglevel "$event_name" $chan -s $sess_name -j >/dev/null 2>&1
+	ok $? "Enable JUL event $event_name for session $sess_name with loglevel $loglevel"
 }
 
 function enable_ust_lttng_event_filter()

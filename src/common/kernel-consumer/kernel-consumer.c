@@ -176,10 +176,12 @@ int lttng_kconsumer_snapshot_channel(uint64_t key, char *path,
 			DBG("Kernel consumer snapshot stream %s/%s (%" PRIu64 ")",
 					path, stream->name, stream->key);
 		}
-		ret = consumer_send_relayd_streams_sent(relayd_id);
-		if (ret < 0) {
-			ERR("sending streams sent to relayd");
-			goto end_unlock;
+		if (relayd_id != -1ULL) {
+			ret = consumer_send_relayd_streams_sent(relayd_id);
+			if (ret < 0) {
+				ERR("sending streams sent to relayd");
+				goto end_unlock;
+			}
 		}
 
 		ret = kernctl_buffer_flush(stream->wait_fd);
@@ -1152,9 +1154,10 @@ ssize_t lttng_kconsumer_read_subbuffer(struct lttng_consumer_stream *stream,
 				(ret != len && stream->net_seq_idx == (uint64_t) -1ULL)) {
 			/*
 			 * Display the error but continue processing to try to release the
-			 * subbuffer
+			 * subbuffer. This is a DBG statement since this is possible to
+			 * happen without being a critical error.
 			 */
-			ERR("Error writing to tracefile "
+			DBG("Error writing to tracefile "
 					"(ret: %zd != len: %lu != subbuf_size: %lu)",
 					ret, len, subbuf_size);
 			write_index = 0;

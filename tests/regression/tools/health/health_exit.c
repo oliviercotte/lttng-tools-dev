@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 - Christian Babeux <christian.babeux@efficios.com>
+ * Copyright (C) 2014 - Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2 only, as
@@ -24,6 +25,7 @@
  * Check if the specified environment variable is set.
  * Return 1 if set, otherwise 0.
  */
+static
 int check_env_var(const char *env)
 {
 	if (env) {
@@ -36,9 +38,11 @@ int check_env_var(const char *env)
 	return 0;
 }
 
-int __testpoint_thread_manage_clients(void)
+/* Session daemon */
+
+int __testpoint_sessiond_thread_manage_clients(void)
 {
-	const char *var = "LTTNG_THREAD_MANAGE_CLIENTS_EXIT";
+	const char *var = "LTTNG_SESSIOND_THREAD_MANAGE_CLIENTS_EXIT";
 
 	if (check_env_var(var)) {
 		rcu_unregister_thread();
@@ -48,9 +52,9 @@ int __testpoint_thread_manage_clients(void)
 	return 0;
 }
 
-int __testpoint_thread_registration_apps(void)
+int __testpoint_sessiond_thread_registration_apps(void)
 {
-	const char *var = "LTTNG_THREAD_REG_APPS_EXIT";
+	const char *var = "LTTNG_SESSIOND_THREAD_REG_APPS_EXIT";
 
 	if (check_env_var(var)) {
 		pthread_exit(NULL);
@@ -59,9 +63,9 @@ int __testpoint_thread_registration_apps(void)
 	return 0;
 }
 
-int __testpoint_thread_manage_apps(void)
+int __testpoint_sessiond_thread_manage_apps(void)
 {
-	const char *var = "LTTNG_THREAD_MANAGE_APPS_EXIT";
+	const char *var = "LTTNG_SESSIOND_THREAD_MANAGE_APPS_EXIT";
 
 	if (check_env_var(var)) {
 		rcu_unregister_thread();
@@ -71,9 +75,9 @@ int __testpoint_thread_manage_apps(void)
 	return 0;
 }
 
-int __testpoint_thread_manage_kernel(void)
+int __testpoint_sessiond_thread_manage_kernel(void)
 {
-	const char *var = "LTTNG_THREAD_MANAGE_KERNEL_EXIT";
+	const char *var = "LTTNG_SESSIOND_THREAD_MANAGE_KERNEL_EXIT";
 
 	if (check_env_var(var)) {
 		pthread_exit(NULL);
@@ -82,9 +86,175 @@ int __testpoint_thread_manage_kernel(void)
 	return 0;
 }
 
-int __testpoint_thread_manage_consumer(void)
+int __testpoint_sessiond_thread_manage_consumer(void)
 {
-	const char *var = "LTTNG_THREAD_MANAGE_CONSUMER_EXIT";
+	const char *var = "LTTNG_SESSIOND_THREAD_MANAGE_CONSUMER_EXIT";
+
+	if (check_env_var(var)) {
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_sessiond_thread_ht_cleanup(void)
+{
+	const char *var = "LTTNG_SESSIOND_THREAD_HT_CLEANUP_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_sessiond_thread_app_manage_notify(void)
+{
+	const char *var = "LTTNG_SESSIOND_THREAD_APP_MANAGE_NOTIFY_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_sessiond_thread_app_reg_dispatch(void)
+{
+	const char *var = "LTTNG_SESSIOND_THREAD_APP_REG_DISPATCH_EXIT";
+
+	if (check_env_var(var)) {
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+/* Consumer daemon */
+
+int __testpoint_consumerd_thread_channel(void)
+{
+	const char *var = "LTTNG_CONSUMERD_THREAD_CHANNEL_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_consumerd_thread_metadata(void)
+{
+	const char *var = "LTTNG_CONSUMERD_THREAD_METADATA_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_consumerd_thread_data(void)
+{
+	const char *var = "LTTNG_CONSUMERD_THREAD_DATA_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_consumerd_thread_sessiond(void)
+{
+	const char *var = "LTTNG_CONSUMERD_THREAD_SESSIOND_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_consumerd_thread_metadata_timer(void)
+{
+	const char *var = "LTTNG_CONSUMERD_THREAD_METADATA_TIMER_EXIT";
+
+	if (check_env_var(var)) {
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+/* Relay daemon */
+
+int __testpoint_relayd_thread_dispatcher(void)
+{
+	const char *var = "LTTNG_RELAYD_THREAD_DISPATCHER_EXIT";
+
+	if (check_env_var(var)) {
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_relayd_thread_worker(void)
+{
+	const char *var = "LTTNG_RELAYD_THREAD_WORKER_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_relayd_thread_listener(void)
+{
+	const char *var = "LTTNG_RELAYD_THREAD_LISTENER_EXIT";
+
+	if (check_env_var(var)) {
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_relayd_thread_live_dispatcher(void)
+{
+	const char *var = "LTTNG_RELAYD_THREAD_LIVE_DISPATCHER_EXIT";
+
+	if (check_env_var(var)) {
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_relayd_thread_live_worker(void)
+{
+	const char *var = "LTTNG_RELAYD_THREAD_LIVE_WORKER_EXIT";
+
+	if (check_env_var(var)) {
+		rcu_unregister_thread();
+		pthread_exit(NULL);
+	}
+
+	return 0;
+}
+
+int __testpoint_relayd_thread_live_listener(void)
+{
+	const char *var = "LTTNG_RELAYD_THREAD_LIVE_LISTENER_EXIT";
 
 	if (check_env_var(var)) {
 		pthread_exit(NULL);

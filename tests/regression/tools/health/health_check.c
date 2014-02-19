@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 - Christian Babeux <christian.babeux@efficios.com>
+ * Copyright (C) 2014 - Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2 only, as
@@ -137,14 +138,12 @@ int main(int argc, char *argv[])
 	int status = 0, i;
 
 	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--relayd-path")) {
-			if (i >= argc - 1) {
-				fprintf(stderr, "Missing relayd path\n");
-				exit(EXIT_FAILURE);
-			}
-			relayd_path = argv[++i];
+		size_t relayd_path_arg_len = strlen("--relayd-path=");
+		if (!strncmp(argv[i], "--relayd-path=",
+				relayd_path_arg_len)) {
+			relayd_path = &argv[i][relayd_path_arg_len];
 		} else {
-			fprintf(stderr, "Unknown option \"%s\". Try --relayd-path PATH.\n", argv[i]);
+			fprintf(stderr, "Unknown option \"%s\". Try --relayd-path=PATH.\n", argv[i]);
 			exit(EXIT_FAILURE);
 		}
 	}

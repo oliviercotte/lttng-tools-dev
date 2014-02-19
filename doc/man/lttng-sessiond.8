@@ -56,6 +56,9 @@ Verbose mode for consumer. Activate DBG() macro.
 .BR "-d, --daemonize"
 Start as a daemon
 .TP
+.BR "-b, --background"
+Start as a daemon, keeping console open
+.TP
 .BR "-g, --group=NAME"
 Specify the tracing group name. (default: tracing)
 .TP
@@ -74,6 +77,9 @@ No output at all.
 .TP
 .BR "    --no-kernel"
 No kernel tracer support
+.TP
+.BR "    --jul-tcp-port"
+JUL application registration TCP port (default: 5345)
 .TP
 .BR "-c, --client-sock=PATH"
 Specify path for the client unix socket

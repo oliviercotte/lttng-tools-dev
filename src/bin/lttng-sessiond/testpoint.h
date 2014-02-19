@@ -21,13 +21,16 @@
 #include <common/testpoint/testpoint.h>
 
 /* Testpoints, internal use only */
-TESTPOINT_DECL(thread_manage_clients);
-TESTPOINT_DECL(thread_manage_clients_before_loop);
-TESTPOINT_DECL(thread_registration_apps);
-TESTPOINT_DECL(thread_manage_apps);
-TESTPOINT_DECL(thread_manage_apps_before_loop);
-TESTPOINT_DECL(thread_manage_kernel);
-TESTPOINT_DECL(thread_manage_kernel_before_loop);
-TESTPOINT_DECL(thread_manage_consumer);
+TESTPOINT_DECL(sessiond_thread_manage_clients);
+TESTPOINT_DECL(sessiond_thread_manage_clients_before_loop);
+TESTPOINT_DECL(sessiond_thread_registration_apps);
+TESTPOINT_DECL(sessiond_thread_manage_apps);
+TESTPOINT_DECL(sessiond_thread_manage_apps_before_loop);
+TESTPOINT_DECL(sessiond_thread_manage_kernel);
+TESTPOINT_DECL(sessiond_thread_manage_kernel_before_loop);
+TESTPOINT_DECL(sessiond_thread_manage_consumer);
+TESTPOINT_DECL(sessiond_thread_ht_cleanup);
+TESTPOINT_DECL(sessiond_thread_app_manage_notify);
+TESTPOINT_DECL(sessiond_thread_app_reg_dispatch);
 
 #endif /* SESSIOND_TESTPOINT_H */

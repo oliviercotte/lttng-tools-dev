@@ -46,6 +46,7 @@
 #include <common/futex.h>
 #include <common/relayd/relayd.h>
 #include <common/utils.h>
+#include <common/daemonize.h>
 #include <common/config/config.h>
 
 #include "lttng-sessiond.h"
@@ -76,7 +77,7 @@ static int tracing_group_name_override;
 static char *opt_pidfile;
 static int opt_sig_parent;
 static int opt_verbose_consumer;
-static int opt_daemon;
+static int opt_daemon, opt_background;
 static int opt_no_kernel;
 static int is_root;			/* Set to 1 if the daemon is running as root */
 static pid_t ppid;          /* Parent PID for --sig-parent option */
@@ -139,6 +140,7 @@ static const struct option long_options[] = {
 	{ "consumerd64-path", 1, 0, 't' },
 	{ "consumerd64-libdir", 1, 0, 'T' },
 	{ "daemonize", 0, 0, 'd' },
+	{ "background", 0, 0, 'b' },
 	{ "sig-parent", 0, 0, 'S' },
 	{ "help", 0, 0, 'h' },
 	{ "group", 1, 0, 'g' },
@@ -283,6 +285,38 @@ struct health_app *health_sessiond;
 unsigned int jul_tcp_port = DEFAULT_JUL_TCP_PORT;
 
 const char * const config_section_name = "sessiond";
+
+/*
+ * Whether sessiond is ready for commands/health check requests.
+ * NR_LTTNG_SESSIOND_READY must match the number of calls to
+ * lttng_sessiond_notify_ready().
+ */
+#define NR_LTTNG_SESSIOND_READY		2
+int lttng_sessiond_ready = NR_LTTNG_SESSIOND_READY;
+
+/* Notify parents that we are ready for cmd and health check */
+static
+void lttng_sessiond_notify_ready(void)
+{
+	if (uatomic_sub_return(&lttng_sessiond_ready, 1) == 0) {
+		/*
+		 * Notify parent pid that we are ready to accept command
+		 * for client side.  This ppid is the one from the
+		 * external process that spawned us.
+		 */
+		if (opt_sig_parent) {
+			kill(ppid, SIGUSR1);
+		}
+
+		/*
+		 * Notify the parent of the fork() process that we are
+		 * ready.
+		 */
+		if (opt_daemon || opt_background) {
+			kill(child_ppid, SIGUSR1);
+		}
+	}
+}
 
 static
 void setup_consumerd_path(void)
@@ -866,13 +900,13 @@ static void *thread_manage_kernel(void *data)
 	 */
 	lttng_poll_init(&events);
 
-	if (testpoint(thread_manage_kernel)) {
+	if (testpoint(sessiond_thread_manage_kernel)) {
 		goto error_testpoint;
 	}
 
 	health_code_update();
 
-	if (testpoint(thread_manage_kernel_before_loop)) {
+	if (testpoint(sessiond_thread_manage_kernel_before_loop)) {
 		goto error_testpoint;
 	}
 
@@ -1052,7 +1086,7 @@ static void *thread_manage_consumer(void *data)
 restart:
 	health_poll_entry();
 
-	if (testpoint(thread_manage_consumer)) {
+	if (testpoint(sessiond_thread_manage_consumer)) {
 		goto error;
 	}
 
@@ -1325,7 +1359,7 @@ static void *thread_manage_apps(void *data)
 
 	health_register(health_sessiond, HEALTH_SESSIOND_TYPE_APP_MANAGE);
 
-	if (testpoint(thread_manage_apps)) {
+	if (testpoint(sessiond_thread_manage_apps)) {
 		goto error_testpoint;
 	}
 
@@ -1341,7 +1375,7 @@ static void *thread_manage_apps(void *data)
 		goto error;
 	}
 
-	if (testpoint(thread_manage_apps_before_loop)) {
+	if (testpoint(sessiond_thread_manage_apps_before_loop)) {
 		goto error;
 	}
 
@@ -1596,6 +1630,10 @@ static void *thread_dispatch_ust_registration(void *data)
 
 	health_register(health_sessiond, HEALTH_SESSIOND_TYPE_APP_REG_DISPATCH);
 
+	if (testpoint(sessiond_thread_app_reg_dispatch)) {
+		goto error_testpoint;
+	}
+
 	health_code_update();
 
 	CDS_INIT_LIST_HEAD(&wait_queue.head);
@@ -1800,6 +1838,7 @@ error:
 		free(wait_node);
 	}
 
+error_testpoint:
 	DBG("Dispatch thread dying");
 	if (err) {
 		health_error();
@@ -1827,7 +1866,7 @@ static void *thread_registration_apps(void *data)
 
 	health_register(health_sessiond, HEALTH_SESSIOND_TYPE_APP_REG);
 
-	if (testpoint(thread_registration_apps)) {
+	if (testpoint(sessiond_thread_registration_apps)) {
 		goto error_testpoint;
 	}
 
@@ -1988,11 +2027,6 @@ static void *thread_registration_apps(void *data)
 
 exit:
 error:
-	if (err) {
-		health_error();
-		ERR("Health error occurred in %s", __func__);
-	}
-
 	/* Notify that the registration thread is gone */
 	notify_ust_apps(0);
 
@@ -2017,6 +2051,10 @@ error_listen:
 error_create_poll:
 error_testpoint:
 	DBG("UST Registration thread cleanup complete");
+	if (err) {
+		health_error();
+		ERR("Health error occurred in %s", __func__);
+	}
 	health_unregister(health_sessiond);
 
 	return NULL;
@@ -3630,6 +3668,8 @@ static void *thread_manage_health(void *data)
 		goto error;
 	}
 
+	lttng_sessiond_notify_ready();
+
 	while (1) {
 		DBG("Health check ready");
 
@@ -3758,10 +3798,6 @@ static void *thread_manage_clients(void *data)
 
 	health_register(health_sessiond, HEALTH_SESSIOND_TYPE_CMD);
 
-	if (testpoint(thread_manage_clients)) {
-		goto error_testpoint;
-	}
-
 	health_code_update();
 
 	ret = lttcomm_listen_unix_sock(client_sock);
@@ -3784,20 +3820,14 @@ static void *thread_manage_clients(void *data)
 		goto error;
 	}
 
-	/*
-	 * Notify parent pid that we are ready to accept command for client side.
-	 * This ppid is the one from the external process that spawned us.
-	 */
-	if (opt_sig_parent) {
-		kill(ppid, SIGUSR1);
+	lttng_sessiond_notify_ready();
+
+	/* This testpoint is after we signal readiness to the parent. */
+	if (testpoint(sessiond_thread_manage_clients)) {
+		goto error;
 	}
 
-	/* Notify the parent of the fork() process that we are ready. */
-	if (opt_daemon) {
-		kill(child_ppid, SIGUSR1);
-	}
-
-	if (testpoint(thread_manage_clients_before_loop)) {
+	if (testpoint(sessiond_thread_manage_clients_before_loop)) {
 		goto error;
 	}
 
@@ -3972,7 +4002,6 @@ error:
 
 error_listen:
 error_create_poll:
-error_testpoint:
 	unlink(client_unix_sock_path);
 	if (client_sock >= 0) {
 		ret = close(client_sock);
@@ -4015,6 +4044,7 @@ static void usage(void)
 	fprintf(stderr, "      --consumerd64-path PATH     Specify path for the 64-bit UST consumer daemon binary\n");
 	fprintf(stderr, "      --consumerd64-libdir PATH   Specify path for the 64-bit UST consumer daemon libraries\n");
 	fprintf(stderr, "  -d, --daemonize                    Start as a daemon.\n");
+	fprintf(stderr, "  -b, --background                   Start as a daemon, keeping console open.\n");
 	fprintf(stderr, "  -g, --group NAME                   Specify the tracing group name. (default: tracing)\n");
 	fprintf(stderr, "  -V, --version                      Show version number.\n");
 	fprintf(stderr, "  -S, --sig-parent                   Send SIGUSR1 to parent pid to notify readiness.\n");
@@ -4052,6 +4082,9 @@ static int set_option(int opt, const char *arg, const char *optname)
 		break;
 	case 'd':
 		opt_daemon = 1;
+		break;
+	case 'b':
+		opt_background = 1;
 		break;
 	case 'g':
 		tracing_group_name = strdup(arg);
@@ -4669,107 +4702,6 @@ error:
 }
 
 /*
- * Daemonize this process by forking and making the parent wait for the child
- * to signal it indicating readiness. Once received, the parent successfully
- * quits.
- *
- * The child process undergoes the same action that daemon(3) does meaning
- * setsid, chdir, and dup /dev/null into 0, 1 and 2.
- *
- * Return 0 on success else -1 on error.
- */
-static int daemonize(void)
-{
-	int ret;
-	pid_t pid;
-
-	/* Get parent pid of this process. */
-	child_ppid = getppid();
-
-	pid = fork();
-	if (pid < 0) {
-		PERROR("fork");
-		goto error;
-	} else if (pid == 0) {
-		int fd;
-		pid_t sid;
-
-		/* Child */
-
-		/*
-		 * Get the newly created parent pid so we can signal that process when
-		 * we are ready to operate.
-		 */
-		child_ppid = getppid();
-
-		sid = setsid();
-		if (sid < 0) {
-			PERROR("setsid");
-			goto error;
-		}
-
-		/* Try to change directory to /. If we can't well at least notify. */
-		ret = chdir("/");
-		if (ret < 0) {
-			PERROR("chdir");
-		}
-
-		fd = open(_PATH_DEVNULL, O_RDWR, 0);
-		if (fd < 0) {
-			PERROR("open %s", _PATH_DEVNULL);
-			/* Let 0, 1 and 2 open since we can't bind them to /dev/null. */
-		} else {
-			(void) dup2(fd, STDIN_FILENO);
-			(void) dup2(fd, STDOUT_FILENO);
-			(void) dup2(fd, STDERR_FILENO);
-			if (fd > 2) {
-				ret = close(fd);
-				if (ret < 0) {
-					PERROR("close");
-				}
-			}
-		}
-		goto end;
-	} else {
-		/* Parent */
-
-		/*
-		 * Waiting for child to notify this parent that it can exit. Note that
-		 * sleep() is interrupted before the 1 second delay as soon as the
-		 * signal is received, so it will not cause visible delay for the
-		 * user.
-		 */
-		while (!CMM_LOAD_SHARED(recv_child_signal)) {
-			int status;
-			pid_t ret;
-
-			/*
-			 * Check if child exists without blocking. If so, we have to stop
-			 * this parent process and return an error.
-			 */
-			ret = waitpid(pid, &status, WNOHANG);
-			if (ret < 0 || (ret != 0 && WIFEXITED(status))) {
-				/* The child exited somehow or was not valid. */
-				goto error;
-			}
-			sleep(1);
-		}
-
-		/*
-		 * From this point on, the parent can exit and the child is now an
-		 * operationnal session daemon ready to serve clients and applications.
-		 */
-		exit(EXIT_SUCCESS);
-	}
-
-end:
-	return 0;
-
-error:
-	return -1;
-}
-
-/*
  * main
  */
 int main(int argc, char **argv)
@@ -4802,10 +4734,11 @@ int main(int argc, char **argv)
 	}
 
 	/* Daemonize */
-	if (opt_daemon) {
+	if (opt_daemon || opt_background) {
 		int i;
 
-		ret = daemonize();
+		ret = lttng_daemonize(&child_ppid, &recv_child_signal,
+			!opt_background);
 		if (ret < 0) {
 			goto error;
 		}

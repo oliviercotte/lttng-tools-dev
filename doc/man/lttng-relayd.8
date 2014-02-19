@@ -50,6 +50,9 @@ There is three debugging level which will print on stderr. Maximum verbosity is
 .BR "-d, --daemonize"
 Start as a daemon
 .TP
+.BR "-b, --background"
+Start as a daemon, keeping console open
+.TP
 .BR "-C, --control-port"
 Control port URL (tcp://0.0.0.0:5342 is the default)
 .TP
@@ -71,6 +74,8 @@ Show version number
 Control timeout of socket connection, receive and send. Takes an integer
 parameter: the timeout value, in milliseconds. A value of 0 or -1 uses
 the timeout of the operating system (this is the default).
+.IP "LTTNG_RELAYD_HEALTH"
+File path used for relay daemon health check communication.
 .PP
 
 .SH "SEE ALSO"

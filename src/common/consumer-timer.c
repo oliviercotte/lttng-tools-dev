@@ -28,6 +28,7 @@
 #include <common/consumer-stream.h>
 
 #include "consumer-timer.h"
+#include "consumer-testpoint.h"
 #include "ust-consumer/ust-consumer.h"
 
 static struct timer_signal_data timer_signal = {
@@ -153,8 +154,8 @@ static int check_kernel_stream(struct lttng_consumer_stream *stream)
 	}
 	ret = kernctl_snapshot(stream->wait_fd);
 	if (ret < 0) {
-		if (errno != EAGAIN) {
-			ERR("Taking kernel snapshot");
+		if (errno != EAGAIN && errno != ENODATA) {
+			PERROR("live timer kernel snapshot");
 			ret = -1;
 			goto error_unlock;
 		}
@@ -472,6 +473,10 @@ void *consumer_timer_thread(void *data)
 
 	health_register(health_consumerd, HEALTH_CONSUMERD_TYPE_METADATA_TIMER);
 
+	if (testpoint(consumerd_thread_metadata_timer)) {
+		goto error_testpoint;
+	}
+
 	health_code_update();
 
 	/* Only self thread will receive signal mask. */
@@ -503,7 +508,9 @@ void *consumer_timer_thread(void *data)
 		}
 	}
 
-	/* Currently never reached */
+error_testpoint:
+	/* Only reached in testpoint error */
+	health_error();
 	health_unregister(health_consumerd);
 
 	/* Never return */

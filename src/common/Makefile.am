@@ -7,14 +7,16 @@ AM_CFLAGS = -fno-strict-aliasing
 
 noinst_HEADERS = lttng-kernel.h defaults.h macros.h error.h futex.h \
 				 uri.h utils.h lttng-kernel-old.h \
-				 consumer-metadata-cache.h consumer-timer.h
+				 consumer-metadata-cache.h consumer-timer.h \
+				 consumer-testpoint.h
 
 # Common library
 noinst_LTLIBRARIES = libcommon.la
 
 libcommon_la_SOURCES = error.h error.c utils.c utils.h runas.c runas.h \
                        common.h futex.c futex.h uri.c uri.h defaults.c \
-                       pipe.c pipe.h readwrite.c readwrite.h
+                       pipe.c pipe.h readwrite.c readwrite.h \
+                       daemonize.c daemonize.h
 libcommon_la_LIBADD = -luuid
 
 # Consumer library

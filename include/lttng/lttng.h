@@ -23,7 +23,17 @@
 #define LTTNG_H
 
 #include <limits.h>
+/*
+ * Necessary to include the fixed width type limits on glibc versions older
+ * than 2.18 when building with a C++ compiler.
+ */
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
+#undef __STDC_LIMIT_MACROS
+#else /* #ifndef __STDC_LIMIT_MACROS */
+#include <stdint.h>
+#endif /* #else #ifndef __STDC_LIMIT_MACROS */
 #include <sys/types.h>
 
 /* Error codes that can be returned by API calls */
@@ -93,6 +103,22 @@ enum lttng_loglevel {
 	LTTNG_LOGLEVEL_DEBUG_FUNCTION         = 12,
 	LTTNG_LOGLEVEL_DEBUG_LINE             = 13,
 	LTTNG_LOGLEVEL_DEBUG                  = 14,
+};
+
+/*
+ * Available loglevels for the JUL domain. Those are an exact map from the
+ * class java.util.logging.Level.
+ */
+enum lttng_loglevel_jul {
+	LTTNG_LOGLEVEL_JUL_OFF                = INT32_MAX,
+	LTTNG_LOGLEVEL_JUL_SEVERE             = 1000,
+	LTTNG_LOGLEVEL_JUL_WARNING            = 900,
+	LTTNG_LOGLEVEL_JUL_INFO               = 800,
+	LTTNG_LOGLEVEL_JUL_CONFIG             = 700,
+	LTTNG_LOGLEVEL_JUL_FINE               = 500,
+	LTTNG_LOGLEVEL_JUL_FINER              = 400,
+	LTTNG_LOGLEVEL_JUL_FINEST             = 300,
+	LTTNG_LOGLEVEL_JUL_ALL                = INT32_MIN,
 };
 
 /*

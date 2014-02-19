@@ -438,17 +438,6 @@ static int send_sessiond_channel(int sock,
 				net_seq_idx = stream->net_seq_idx;
 			}
 		}
-		ret = consumer_send_relayd_streams_sent(net_seq_idx);
-		if (ret < 0) {
-			/*
-			 * Flag that the relayd was the problem here probably due to a
-			 * communicaton error on the socket.
-			 */
-			if (relayd_error) {
-				*relayd_error = 1;
-			}
-			ret_code = LTTNG_ERR_RELAYD_CONNECT_FAIL;
-		}
 	}
 
 	/* Inform sessiond that we are about to send channel and streams. */
@@ -640,45 +629,6 @@ error:
 	rcu_read_unlock();
 	return ret;
 }
-/*
- * Close metadata stream wakeup_fd using the given key to retrieve the channel.
- * RCU read side lock MUST be acquired before calling this function.
- *
- * NOTE: This function does NOT take any channel nor stream lock.
- *
- * Return 0 on success else LTTng error code.
- */
-static int _close_metadata(struct lttng_consumer_channel *channel)
-{
-	int ret = LTTCOMM_CONSUMERD_SUCCESS;
-
-	assert(channel);
-	assert(channel->type == CONSUMER_CHANNEL_TYPE_METADATA);
-
-	if (channel->switch_timer_enabled == 1) {
-		DBG("Deleting timer on metadata channel");
-		consumer_timer_switch_stop(channel);
-	}
-
-	if (channel->metadata_stream) {
-		ret = ustctl_stream_close_wakeup_fd(channel->metadata_stream->ustream);
-		if (ret < 0) {
-			ERR("UST consumer unable to close fd of metadata (ret: %d)", ret);
-			ret = LTTCOMM_CONSUMERD_ERROR_METADATA;
-		}
-
-		if (channel->monitor) {
-			/* Close the read-side in consumer_del_metadata_stream */
-			ret = close(channel->metadata_stream->ust_metadata_poll_pipe[1]);
-			if (ret < 0) {
-				PERROR("Close UST metadata write-side poll pipe");
-				ret = LTTCOMM_CONSUMERD_ERROR_METADATA;
-			}
-		}
-	}
-
-	return ret;
-}
 
 /*
  * Close metadata stream wakeup_fd using the given key to retrieve the channel.
@@ -713,7 +663,7 @@ static int close_metadata(uint64_t chan_key)
 		goto error_unlock;
 	}
 
-	ret = _close_metadata(channel);
+	lttng_ustconsumer_close_metadata(channel);
 
 error_unlock:
 	pthread_mutex_unlock(&channel->lock);
@@ -769,6 +719,12 @@ static int setup_metadata(struct lttng_consumer_local_data *ctx, uint64_t key)
 			ret = LTTCOMM_CONSUMERD_ERROR_METADATA;
 			goto error;
 		}
+		ret = consumer_send_relayd_streams_sent(
+				metadata->metadata_stream->net_seq_idx);
+		if (ret < 0) {
+			ret = LTTCOMM_CONSUMERD_RELAYD_FAIL;
+			goto error;
+		}
 	}
 
 	ret = send_streams_to_thread(metadata, ctx);
@@ -793,8 +749,9 @@ error:
 	 * the stream is still in the local stream list of the channel. This call
 	 * will make sure to clean that list.
 	 */
-	cds_list_del(&metadata->metadata_stream->send_node);
 	consumer_stream_destroy(metadata->metadata_stream, NULL);
+	cds_list_del(&metadata->metadata_stream->send_node);
+	metadata->metadata_stream = NULL;
 error_no_stream:
 end:
 	return ret;
@@ -886,8 +843,8 @@ error_stream:
 	 * Clean up the stream completly because the next snapshot will use a new
 	 * metadata stream.
 	 */
-	cds_list_del(&metadata_stream->send_node);
 	consumer_stream_destroy(metadata_stream, NULL);
+	cds_list_del(&metadata_stream->send_node);
 	metadata_channel->metadata_stream = NULL;
 
 error:
@@ -1734,6 +1691,22 @@ void lttng_ustconsumer_del_stream(struct lttng_consumer_stream *stream)
 	ustctl_destroy_stream(stream->ustream);
 }
 
+int lttng_ustconsumer_get_wakeup_fd(struct lttng_consumer_stream *stream)
+{
+	assert(stream);
+	assert(stream->ustream);
+
+	return ustctl_stream_get_wakeup_fd(stream->ustream);
+}
+
+int lttng_ustconsumer_close_wakeup_fd(struct lttng_consumer_stream *stream)
+{
+	assert(stream);
+	assert(stream->ustream);
+
+	return ustctl_stream_close_wakeup_fd(stream->ustream);
+}
+
 /*
  * Populate index values of a UST stream. Values are set in big endian order.
  *
@@ -2140,6 +2113,45 @@ end:
 }
 
 /*
+ * Stop a given metadata channel timer if enabled and close the wait fd which
+ * is the poll pipe of the metadata stream.
+ *
+ * This MUST be called with the metadata channel acquired.
+ */
+void lttng_ustconsumer_close_metadata(struct lttng_consumer_channel *metadata)
+{
+	int ret;
+
+	assert(metadata);
+	assert(metadata->type == CONSUMER_CHANNEL_TYPE_METADATA);
+
+	DBG("Closing metadata channel key %" PRIu64, metadata->key);
+
+	if (metadata->switch_timer_enabled == 1) {
+		consumer_timer_switch_stop(metadata);
+	}
+
+	if (!metadata->metadata_stream) {
+		goto end;
+	}
+
+	/*
+	 * Closing write side so the thread monitoring the stream wakes up if any
+	 * and clean the metadata stream.
+	 */
+	if (metadata->metadata_stream->ust_metadata_poll_pipe[1] >= 0) {
+		ret = close(metadata->metadata_stream->ust_metadata_poll_pipe[1]);
+		if (ret < 0) {
+			PERROR("closing metadata pipe write side");
+		}
+		metadata->metadata_stream->ust_metadata_poll_pipe[1] = -1;
+	}
+
+end:
+	return;
+}
+
+/*
  * Close every metadata stream wait fd of the metadata hash table. This
  * function MUST be used very carefully so not to run into a race between the
  * metadata thread handling streams and this function closing their wait fd.
@@ -2148,7 +2160,7 @@ end:
  * producer so calling this is safe because we are assured that no state change
  * can occur in the metadata thread for the streams in the hash table.
  */
-void lttng_ustconsumer_close_metadata(struct lttng_ht *metadata_ht)
+void lttng_ustconsumer_close_all_metadata(struct lttng_ht *metadata_ht)
 {
 	struct lttng_ht_iter iter;
 	struct lttng_consumer_stream *stream;
@@ -2165,13 +2177,7 @@ void lttng_ustconsumer_close_metadata(struct lttng_ht *metadata_ht)
 		health_code_update();
 
 		pthread_mutex_lock(&stream->chan->lock);
-		/*
-		 * Whatever returned value, we must continue to try to close everything
-		 * so ignore it.
-		 */
-		(void) _close_metadata(stream->chan);
-		DBG("Metadata wait fd %d and poll pipe fd %d closed", stream->wait_fd,
-				stream->ust_metadata_poll_pipe[1]);
+		lttng_ustconsumer_close_metadata(stream->chan);
 		pthread_mutex_unlock(&stream->chan->lock);
 
 	}

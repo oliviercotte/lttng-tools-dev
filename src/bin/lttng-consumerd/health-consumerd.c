@@ -233,6 +233,10 @@ void *thread_manage_health(void *data)
 		goto error;
 	}
 
+	/* Perform prior memory accesses before decrementing ready */
+	cmm_smp_mb__before_uatomic_dec();
+	uatomic_dec(&lttng_consumer_ready);
+
 	while (1) {
 		DBG("Health check ready");
 
@@ -310,7 +314,7 @@ restart:
 			}
 		}
 
-		DBG2("Health check return value %" PRIx64, reply.ret_code);
+		DBG("Health check return value %" PRIx64, reply.ret_code);
 
 		ret = send_unix_sock(new_sock, (void *) &reply, sizeof(reply));
 		if (ret < 0) {
