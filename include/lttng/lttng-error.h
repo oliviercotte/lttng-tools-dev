@@ -146,7 +146,7 @@ enum lttng_error_code {
 	LTTNG_ERR_LOAD_INVALID_CONFIG    = 113, /* Invalid session configuration */
 	LTTNG_ERR_LOAD_IO_FAIL           = 114, /* IO error while reading a session configuration */
 	LTTNG_ERR_LOAD_SESSION_NOT_FOUND = 115, /* Session configuration not found */
-	LTTNG_ERR_LOAD_SESSION_NOENT = 116, /* Session file not found */
+	LTTNG_ERR_LOAD_SESSION_NOENT     = 116, /* Session file not found */
 
 	/* MUST be last element */
 	LTTNG_ERR_NR,                           /* Last element */
