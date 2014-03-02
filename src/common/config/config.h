@@ -149,7 +149,8 @@ int config_writer_write_element_unsigned_int(struct config_writer *writer,
  *
  * Returns zero if the element's value could be written.
  * Negative values indicate an error.
- */LTTNG_HIDDEN
+ */
+LTTNG_HIDDEN
 int config_writer_write_element_signed_int(struct config_writer *writer,
 		const char *element_name, int64_t value);
 
