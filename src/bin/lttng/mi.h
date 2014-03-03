@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013   - Jonathan Rajotte <jonathan.r.julien@gmail.com>
+ * Copyright (C) 2014   - Jonathan Rajotte <jonathan.r.julien@gmail.com>
  *                      - Olivier Cotte <olivier.cotte@polymtl.ca>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -49,6 +49,13 @@ mi_writer *mi_writer_create(int fd_output);
  */
 LTTNG_HIDDEN
 int mi_writer_destroy(mi_writer *writer);
+
+
+LTTNG_HIDDEN
+int mi_writer_command_open(mi_writer *writer, const char* command);
+
+LTTNG_HIDDEN
+int mi_writer_command_close(mi_writer *writer);
 
 /*
  * Open an element tag.

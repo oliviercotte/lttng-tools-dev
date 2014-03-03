@@ -29,6 +29,7 @@
 
 #include "../command.h"
 #include "../mi.h"
+#include "../mi-internal.h"
 
 static int opt_xml;
 
@@ -132,11 +133,17 @@ int cmd_version(int argc, const char **argv)
 			goto end;
 		}
 
+                ret = mi_writer_command_open(miWriter, mi_element_command_version);
+                if (ret) {
+			goto end;
+		}
+                
 		ret = mi_version_print(miWriter);
 		if (ret) {
 			goto end;
 		}
-
+                
+                ret = mi_writer_command_close(miWriter);
 	} else {
 
 		MSG("LTTng version " VERSION " - " VERSION_NAME);
