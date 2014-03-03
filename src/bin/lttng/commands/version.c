@@ -132,39 +132,8 @@ int cmd_version(int argc, const char **argv)
 			goto end;
 		}
 
-		ret = config_writer_open_element(miWriter,"command");
-		if (ret) {
-			ret = LTTNG_ERR_MI_IO_FAIL;
-			goto end;
-		}
-
-		ret = config_writer_write_element_string(miWriter,"name","version");
-		if (ret) {
-			ret = LTTNG_ERR_MI_IO_FAIL;
-			goto end;
-		}
-
-		ret = config_writer_open_element(miWriter,"output");
-		if (ret) {
-			ret = LTTNG_ERR_MI_IO_FAIL;
-			goto end;
-		}
-
 		ret = mi_version_print(miWriter);
 		if (ret) {
-			goto end;
-		}
-
-		/* output  */
-		ret = config_writer_close_element(miWriter);
-		if (ret) {
-			ret = LTTNG_ERR_MI_IO_FAIL;
-			goto end;
-		}
-		/* command  */
-		ret = config_writer_close_element(miWriter);
-		if (ret) {
-			ret = LTTNG_ERR_MI_IO_FAIL;
 			goto end;
 		}
 
