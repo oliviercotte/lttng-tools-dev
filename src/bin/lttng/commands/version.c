@@ -28,7 +28,7 @@
 #include <common/config/config.h>
 
 #include "../command.h"
-
+#include "../mi.h"
 
 static int opt_xml;
 
@@ -65,27 +65,27 @@ int mi_version_print(struct config_writer *writer)
 {
 	int ret;
 
-	ret = config_writer_write_element_string(writer,"versionStr",VERSION);
+	ret = mi_writer_write_element_string(writer,"versionStr",VERSION);
 	if (ret) {
 		goto end;
 	}
-	ret = config_writer_write_element_unsigned_int(writer,"majorNum",VERSION_MAJOR);
+	ret = mi_writer_write_element_unsigned_int(writer,"majorNum",VERSION_MAJOR);
 	if (ret) {
 		goto end;
 	}
-	ret = config_writer_write_element_unsigned_int(writer,"minorNum",VERSION_MINOR);
+	ret = mi_writer_write_element_unsigned_int(writer,"minorNum",VERSION_MINOR);
 	if (ret) {
 		goto end;
 	}
-	ret = config_writer_write_element_unsigned_int(writer,"patchLevel",VERSION_PATCHLEVEL);
+	ret = mi_writer_write_element_unsigned_int(writer,"patchLevel",VERSION_PATCHLEVEL);
 	if (ret) {
 		goto end;
 	}
-	ret = config_writer_write_element_string(writer,"name",VERSION_NAME);
+	ret = mi_writer_write_element_string(writer,"name",VERSION_NAME);
 	if (ret) {
 		goto end;
 	}
-	ret = config_writer_write_element_string(writer,"description",VERSION_DESCRIPTION);
+	ret = mi_writer_write_element_string(writer,"description",VERSION_DESCRIPTION);
 	if (ret) {
 		goto end;
 	}
@@ -126,7 +126,7 @@ int cmd_version(int argc, const char **argv)
 
 	/* Mi check */
 	if (opt_xml) {
-		miWriter = config_writer_create(fileno(stdout));
+		miWriter = mi_writer_create(fileno(stdout));
 		if (!miWriter) {
 			ret = LTTNG_ERR_NOMEM;
 			goto end;
@@ -146,7 +146,7 @@ int cmd_version(int argc, const char **argv)
 	}
 
 end:
-	if ( miWriter && config_writer_destroy(miWriter)) {
+	if ( miWriter && mi_writer_destroy(miWriter)) {
 		/* Preserve original error code */
 		ret = ret ? ret : LTTNG_ERR_MI_IO_FAIL;
 	}
