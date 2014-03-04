@@ -29,6 +29,8 @@
 
 #include "../command.h"
 #include "../utils.h"
+#include "../mi.h"
+#include "../mi-internal.h"
 
 #include <common/defaults.h>
 #include <common/sessiond-comm/sessiond-comm.h>
@@ -46,6 +48,7 @@ static int opt_no_output;
 static int opt_snapshot;
 static unsigned int opt_live_timer;
 static int opt_disable_consumer;
+static int opt_xml;
 
 enum {
 	OPT_HELP = 1,
@@ -63,9 +66,10 @@ static struct poptOption long_options[] = {
 	{"data-url",       'D', POPT_ARG_STRING, &opt_data_url, 0, 0, 0},
 	{"no-output",       0, POPT_ARG_VAL, &opt_no_output, 1, 0, 0},
 	{"no-consumer",     0, POPT_ARG_VAL, &opt_no_consumer, 1, 0, 0},
-	{"disable-consumer", 0, POPT_ARG_VAL, &opt_disable_consumer, 1, 0, 0},
+	{"disable-consumer",0, POPT_ARG_VAL, &opt_disable_consumer, 1, 0, 0},
 	{"snapshot",        0, POPT_ARG_VAL, &opt_snapshot, 1, 0, 0},
 	{"live",            0, POPT_ARG_INT, 0, OPT_LIVE_TIMER, 0, 0},
+	{"xml",             'x', POPT_ARG_VAL, &opt_xml , 1, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0}
 };
 
@@ -88,6 +92,7 @@ static void usage(FILE *ofp)
 	fprintf(ofp, "Options:\n");
 	fprintf(ofp, "  -h, --help           Show this help\n");
 	fprintf(ofp, "      --list-options   Simple listing of options\n");
+	fprintf(ofp, "  -x, --xml            Machine interface : xml\n");
 	fprintf(ofp, "  -o, --output PATH    Specify output path for traces\n");
 	fprintf(ofp, "      --no-output      Traces will not be outputted\n");
 	fprintf(ofp, "      --snapshot       Set the session in snapshot mode.\n");
