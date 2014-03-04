@@ -66,27 +66,27 @@ int mi_version_print(struct config_writer *writer)
 {
 	int ret;
 
-	ret = mi_writer_write_element_string(writer,"versionStr",VERSION);
+	ret = mi_writer_write_element_string(writer,mi_element_version_str,VERSION);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_unsigned_int(writer,"majorNum",VERSION_MAJOR);
+	ret = mi_writer_write_element_unsigned_int(writer,mi_element_version_major,VERSION_MAJOR);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_unsigned_int(writer,"minorNum",VERSION_MINOR);
+	ret = mi_writer_write_element_unsigned_int(writer,mi_element_version_minor,VERSION_MINOR);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_unsigned_int(writer,"patchLevel",VERSION_PATCHLEVEL);
+	ret = mi_writer_write_element_unsigned_int(writer,mi_element_version_patch_level,VERSION_PATCHLEVEL);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_string(writer,"name",VERSION_NAME);
+	ret = mi_writer_write_element_string(writer,mi_element_version_name,VERSION_NAME);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_string(writer,"description",VERSION_DESCRIPTION);
+	ret = mi_writer_write_element_string(writer,mi_element_version_description,VERSION_DESCRIPTION);
 	if (ret) {
 		goto end;
 	}

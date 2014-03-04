@@ -7,6 +7,14 @@
 const char * const mi_element_command = "command";
 const char * const mi_element_command_version = "version";
 
+/* Stings related to command: version */
+const char * const mi_element_version_str = "versionStr";
+const char * const mi_element_version_name = "name";
+const char * const mi_element_version_major = "major";
+const char * const mi_element_version_minor = "minor";
+const char * const mi_element_version_patch_level = "patchLevel";
+const char * const mi_element_version_description = "description";
+
 LTTNG_HIDDEN
 mi_writer *mi_writer_create(int fd_output)
 {
@@ -14,7 +22,7 @@ mi_writer *mi_writer_create(int fd_output)
 }
 
 LTTNG_HIDDEN
-int mi_writer_destroy(mi_writer *writer) 
+int mi_writer_destroy(mi_writer *writer)
 {
     return config_writer_destroy(writer);
 }
@@ -29,7 +37,6 @@ int mi_writer_command_open(mi_writer *writer, const char* command)
         goto end;
     }
     ret = mi_writer_open_element(writer, command);
-    
 end:
     return ret;
 }
