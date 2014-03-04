@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include <config.h>
 
-#include <common/config/config.h>
 
 #include "../command.h"
 #include "../mi.h"
@@ -35,13 +34,12 @@ static int opt_xml;
 
 enum {
 	OPT_HELP = 1,
-	OPT_XML,
 	OPT_LIST_OPTIONS,
 };
 
 static struct poptOption long_options[] = {
 	/* longName, shortName, argInfo, argPtr, value, descrip, argDesc */
-	{"xml",      'x', POPT_ARG_NONE, 0, OPT_XML, 0, 0},
+	{"xml",      'x', POPT_ARG_VAL, &opt_xml, 1, 0, 0},
 	{"help",      'h', POPT_ARG_NONE, 0, OPT_HELP, 0, 0},
 	{"list-options", 0, POPT_ARG_NONE, NULL, OPT_LIST_OPTIONS, NULL, NULL},
 	{0, 0, 0, 0, 0, 0, 0}
@@ -55,8 +53,8 @@ static void usage(FILE *ofp)
 	fprintf(ofp, "usage: lttng version [OPTIONS]\n");
 	fprintf(ofp, "\n");
 	fprintf(ofp, "Options:\n");
-	fprintf(ofp, "  -x, --xml                Xml output\n");
 	fprintf(ofp, "  -h, --help               Show this help\n");
+	fprintf(ofp, "  -x, --xml                Machine interface : xml\n");
 	fprintf(ofp, "      --list-options       Simple listing of options\n");
 	fprintf(ofp, "\n");
 }
@@ -66,30 +64,36 @@ int mi_version_print(struct config_writer *writer)
 {
 	int ret;
 
-	ret = mi_writer_write_element_string(writer,"versionStr",VERSION);
+	ret = mi_writer_write_element_string(writer,mi_element_version_str,VERSION);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_unsigned_int(writer,"majorNum",VERSION_MAJOR);
+	ret = mi_writer_write_element_unsigned_int(writer,mi_element_version_major,VERSION_MAJOR);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_unsigned_int(writer,"minorNum",VERSION_MINOR);
+	ret = mi_writer_write_element_unsigned_int(writer,mi_element_version_minor,VERSION_MINOR);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_unsigned_int(writer,"patchLevel",VERSION_PATCHLEVEL);
+	ret = mi_writer_write_element_unsigned_int(writer,mi_element_version_patch_level,VERSION_PATCHLEVEL);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_string(writer,"name",VERSION_NAME);
+	ret = mi_writer_write_element_string(writer,mi_element_version_name,VERSION_NAME);
 	if (ret) {
 		goto end;
 	}
-	ret = mi_writer_write_element_string(writer,"description",VERSION_DESCRIPTION);
+	ret = mi_writer_write_element_string(writer,mi_element_version_description,VERSION_DESCRIPTION);
 	if (ret) {
 		goto end;
 	}
+	ret = mi_writer_write_element_string(writer,mi_element_version_web,PACKAGE_URL);
+	if (ret) {
+		goto end;
+	}
+	ret = mi_writer_write_element_string(writer,mi_element_version_license,
+				"LTTng is free software and under the GPL license and part LGP");
 
 end:
 	return ret;
@@ -115,9 +119,6 @@ int cmd_version(int argc, const char **argv)
 		case OPT_LIST_OPTIONS:
 			list_cmd_options(stdout, long_options);
 			goto end;
-		case OPT_XML:
-			opt_xml = 1;
-			break;
 		default:
 			usage(stderr);
 			ret = CMD_UNDEFINED;
@@ -125,7 +126,7 @@ int cmd_version(int argc, const char **argv)
 		}
 	}
 
-	/* Mi check */
+	/* XML check */
 	if (opt_xml) {
 		miWriter = mi_writer_create(fileno(stdout));
 		if (!miWriter) {
@@ -133,17 +134,18 @@ int cmd_version(int argc, const char **argv)
 			goto end;
 		}
 
-                ret = mi_writer_command_open(miWriter, mi_element_command_version);
-                if (ret) {
+		ret = mi_writer_command_open(miWriter, mi_element_command_version);
+		if (ret) {
 			goto end;
 		}
-                
+
 		ret = mi_version_print(miWriter);
 		if (ret) {
 			goto end;
 		}
-                
-                ret = mi_writer_command_close(miWriter);
+
+		ret = mi_writer_command_close(miWriter);
+
 	} else {
 
 		MSG("LTTng version " VERSION " - " VERSION_NAME);
