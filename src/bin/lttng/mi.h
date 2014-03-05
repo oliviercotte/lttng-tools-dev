@@ -21,7 +21,7 @@
 
 #include <common/config/config.h>
 #include <common/error.h>
-//#include <common/macros.h>
+#include <common/macros.h>
 #include <stdint.h>
 
 /* Instance of a machine interface writer. */
