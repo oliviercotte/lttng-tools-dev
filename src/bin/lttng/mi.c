@@ -21,19 +21,19 @@
 #include "mi.h"
 
 /* Strings related to command */
-const char * const mi_element_command = "command";
-const char * const mi_element_command_version = "version";
-const char * const mi_element_command_list = "list";
+const char * const mi_element_command                           = "command";
+const char * const mi_element_command_version                   = "version";
+const char * const mi_element_command_list                      = "list";
 
 /* Strings related to command: version */
-const char * const mi_element_version_str = "string";
-const char * const mi_element_version_web = "url";
-const char * const mi_element_version_name = "name";
-const char * const mi_element_version_major = "major";
-const char * const mi_element_version_minor = "minor";
-const char * const mi_element_version_license = "license";
-const char * const mi_element_version_patch_level = "patchLevel";
-const char * const mi_element_version_description = "description";
+const char * const mi_element_version_str                       = "string";
+const char * const mi_element_version_web                       = "url";
+const char * const mi_element_version_name                      = "name";
+const char * const mi_element_version_major                     = "major";
+const char * const mi_element_version_minor                     = "minor";
+const char * const mi_element_version_license                   = "license";
+const char * const mi_element_version_patch_level               = "patchLevel";
+const char * const mi_element_version_description               = "description";
 
 /* Strings related to command: list */
 const char * const mi_element_list_kernel_event_tracepoint      = "LTTNG_EVENT_TRACEPOINT";
