@@ -74,7 +74,6 @@ int mi_writer_destroy(mi_writer *writer)
     return config_writer_destroy(writer);
 }
 
-// TODO: Check if command str size is < 255
 LTTNG_HIDDEN
 int mi_writer_command_open(mi_writer *writer, const char* command)
 {

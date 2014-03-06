@@ -68,7 +68,7 @@ static struct poptOption long_options[] = {
 	{"domain",    'd', POPT_ARG_VAL, &opt_domain, 1, 0, 0},
 	{"fields",    'f', POPT_ARG_VAL, &opt_fields, 1, 0, 0},
 	{"list-options", 0, POPT_ARG_NONE, NULL, OPT_LIST_OPTIONS, NULL, NULL},
-        {"xml",      'x', POPT_ARG_VAL, &opt_xml, 1, 0, 0},
+	{"xml",      'x', POPT_ARG_VAL, &opt_xml, 1, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0}
 };
 
@@ -131,93 +131,93 @@ end:
 	return cmdline;
 }
 
-static
+	static
 const char *active_string(int value)
 {
 	switch (value) {
-	case 0:	return "inactive";
-	case 1: return "active";
-	case -1: return "";
-	default: return NULL;
+		case 0:	return "inactive";
+		case 1: return "active";
+		case -1: return "";
+		default: return NULL;
 	}
 }
 
 static const char *snapshot_string(int value)
 {
 	switch (value) {
-	case 1:
-		return " snapshot";
-	default:
-		return "";
+		case 1:
+			return " snapshot";
+		default:
+			return "";
 	}
 }
 
-static
+	static
 const char *enabled_string(int value)
 {
 	switch (value) {
-	case 0:	return " [disabled]";
-	case 1: return " [enabled]";
-	case -1: return "";
-	default: return NULL;
+		case 0:	return " [disabled]";
+		case 1: return " [enabled]";
+		case -1: return "";
+		default: return NULL;
 	}
 }
 
-static
+	static
 const char *filter_string(int value)
 {
 	switch (value) {
-	case 1:	return " [with filter]";
-	default: return "";
+		case 1:	return " [with filter]";
+		default: return "";
 	}
 }
 
-static
+	static
 const char *exclusion_string(int value)
 {
 	switch (value) {
-	case 1: return " [has exclusions]";
-	default: return "";
+		case 1: return " [has exclusions]";
+		default: return "";
 	}
 }
 
 static const char *loglevel_string(int value)
 {
 	switch (value) {
-	case -1:
-		return "";
-	case LTTNG_LOGLEVEL_EMERG:
-		return "TRACE_EMERG";
-	case LTTNG_LOGLEVEL_ALERT:
-		return "TRACE_ALERT";
-	case LTTNG_LOGLEVEL_CRIT:
-		return "TRACE_CRIT";
-	case LTTNG_LOGLEVEL_ERR:
-		return "TRACE_ERR";
-	case LTTNG_LOGLEVEL_WARNING:
-		return "TRACE_WARNING";
-	case LTTNG_LOGLEVEL_NOTICE:
-		return "TRACE_NOTICE";
-	case LTTNG_LOGLEVEL_INFO:
-		return "TRACE_INFO";
-	case LTTNG_LOGLEVEL_DEBUG_SYSTEM:
-		return "TRACE_DEBUG_SYSTEM";
-	case LTTNG_LOGLEVEL_DEBUG_PROGRAM:
-		return "TRACE_DEBUG_PROGRAM";
-	case LTTNG_LOGLEVEL_DEBUG_PROCESS:
-		return "TRACE_DEBUG_PROCESS";
-	case LTTNG_LOGLEVEL_DEBUG_MODULE:
-		return "TRACE_DEBUG_MODULE";
-	case LTTNG_LOGLEVEL_DEBUG_UNIT:
-		return "TRACE_DEBUG_UNIT";
-	case LTTNG_LOGLEVEL_DEBUG_FUNCTION:
-		return "TRACE_DEBUG_FUNCTION";
-	case LTTNG_LOGLEVEL_DEBUG_LINE:
-		return "TRACE_DEBUG_LINE";
-	case LTTNG_LOGLEVEL_DEBUG:
-		return "TRACE_DEBUG";
-	default:
-		return "<<UNKNOWN>>";
+		case -1:
+			return "";
+		case LTTNG_LOGLEVEL_EMERG:
+			return "TRACE_EMERG";
+		case LTTNG_LOGLEVEL_ALERT:
+			return "TRACE_ALERT";
+		case LTTNG_LOGLEVEL_CRIT:
+			return "TRACE_CRIT";
+		case LTTNG_LOGLEVEL_ERR:
+			return "TRACE_ERR";
+		case LTTNG_LOGLEVEL_WARNING:
+			return "TRACE_WARNING";
+		case LTTNG_LOGLEVEL_NOTICE:
+			return "TRACE_NOTICE";
+		case LTTNG_LOGLEVEL_INFO:
+			return "TRACE_INFO";
+		case LTTNG_LOGLEVEL_DEBUG_SYSTEM:
+			return "TRACE_DEBUG_SYSTEM";
+		case LTTNG_LOGLEVEL_DEBUG_PROGRAM:
+			return "TRACE_DEBUG_PROGRAM";
+		case LTTNG_LOGLEVEL_DEBUG_PROCESS:
+			return "TRACE_DEBUG_PROCESS";
+		case LTTNG_LOGLEVEL_DEBUG_MODULE:
+			return "TRACE_DEBUG_MODULE";
+		case LTTNG_LOGLEVEL_DEBUG_UNIT:
+			return "TRACE_DEBUG_UNIT";
+		case LTTNG_LOGLEVEL_DEBUG_FUNCTION:
+			return "TRACE_DEBUG_FUNCTION";
+		case LTTNG_LOGLEVEL_DEBUG_LINE:
+			return "TRACE_DEBUG_LINE";
+		case LTTNG_LOGLEVEL_DEBUG:
+			return "TRACE_DEBUG";
+		default:
+			return "<<UNKNOWN>>";
 	}
 }
 
@@ -227,93 +227,93 @@ static const char *loglevel_string(int value)
 static void print_events(struct lttng_event *event)
 {
 	switch (event->type) {
-	case LTTNG_EVENT_TRACEPOINT:
-	{
-		if (event->loglevel != -1) {
-                    MSG("LTTNG_EVENT_TRACEPOINT");
-			MSG("%s%s (loglevel: %s (%d)) (type: tracepoint)%s%s%s",
-				indent6,
-				event->name,
-				loglevel_string(event->loglevel),
-				event->loglevel,
-				enabled_string(event->enabled),
-				exclusion_string(event->exclusion),
-				filter_string(event->filter));
-		} else {
-			MSG("%s%s (type: tracepoint)%s%s%s",
-				indent6,
-				event->name,
-				enabled_string(event->enabled),
-				exclusion_string(event->exclusion),
-				filter_string(event->filter));
-		}
-		break;
-	}
-	case LTTNG_EVENT_FUNCTION:
-            MSG("LTTNG_EVENT_FUNCTION");
-		MSG("%s%s (type: function)%s%s", indent6,
-				event->name, enabled_string(event->enabled),
-				filter_string(event->filter));
-		if (event->attr.probe.addr != 0) {
-			MSG("%saddr: 0x%" PRIx64, indent8, event->attr.probe.addr);
-		} else {
-			MSG("%soffset: 0x%" PRIx64, indent8, event->attr.probe.offset);
-			MSG("%ssymbol: %s", indent8, event->attr.probe.symbol_name);
-		}
-		break;
-	case LTTNG_EVENT_PROBE:
-            MSG("LTTNG_EVENT_PROBE");
-		MSG("%s%s (type: probe)%s%s", indent6,
-				event->name, enabled_string(event->enabled),
-				filter_string(event->filter));
-		if (event->attr.probe.addr != 0) {
-			MSG("%saddr: 0x%" PRIx64, indent8, event->attr.probe.addr);
-		} else {
-			MSG("%soffset: 0x%" PRIx64, indent8, event->attr.probe.offset);
-			MSG("%ssymbol: %s", indent8, event->attr.probe.symbol_name);
-		}
-		break;
-	case LTTNG_EVENT_FUNCTION_ENTRY:
-            MSG("LTTNG_EVENT_FUNCTION_ENTRY");
-		MSG("%s%s (type: function)%s%s", indent6,
-				event->name, enabled_string(event->enabled),
-				filter_string(event->filter));
-		MSG("%ssymbol: \"%s\"", indent8, event->attr.ftrace.symbol_name);
-		break;
-	case LTTNG_EVENT_SYSCALL:
-            MSG("LTTNG_EVENT_SYSCALL");
-		MSG("%ssyscalls (type: syscall)%s%s", indent6,
-				enabled_string(event->enabled),
-				filter_string(event->filter));
-		break;
-	case LTTNG_EVENT_NOOP:
-            MSG("LTTNG_EVENT_NOOP");
-		MSG("%s (type: noop)%s%s", indent6,
-				enabled_string(event->enabled),
-				filter_string(event->filter));
-		break;
-	case LTTNG_EVENT_ALL:
-            MSG("LTTNG_EVENT_ALL");
-		/* We should never have "all" events in list. */
-		assert(0);
-		break;
+		case LTTNG_EVENT_TRACEPOINT:
+			{
+				if (event->loglevel != -1) {
+					MSG("LTTNG_EVENT_TRACEPOINT");
+					MSG("%s%s (loglevel: %s (%d)) (type: tracepoint)%s%s%s",
+							indent6,
+							event->name,
+							loglevel_string(event->loglevel),
+							event->loglevel,
+							enabled_string(event->enabled),
+							exclusion_string(event->exclusion),
+							filter_string(event->filter));
+				} else {
+					MSG("%s%s (type: tracepoint)%s%s%s",
+							indent6,
+							event->name,
+							enabled_string(event->enabled),
+							exclusion_string(event->exclusion),
+							filter_string(event->filter));
+				}
+				break;
+			}
+		case LTTNG_EVENT_FUNCTION:
+			MSG("LTTNG_EVENT_FUNCTION");
+			MSG("%s%s (type: function)%s%s", indent6,
+					event->name, enabled_string(event->enabled),
+					filter_string(event->filter));
+			if (event->attr.probe.addr != 0) {
+				MSG("%saddr: 0x%" PRIx64, indent8, event->attr.probe.addr);
+			} else {
+				MSG("%soffset: 0x%" PRIx64, indent8, event->attr.probe.offset);
+				MSG("%ssymbol: %s", indent8, event->attr.probe.symbol_name);
+			}
+			break;
+		case LTTNG_EVENT_PROBE:
+			MSG("LTTNG_EVENT_PROBE");
+			MSG("%s%s (type: probe)%s%s", indent6,
+					event->name, enabled_string(event->enabled),
+					filter_string(event->filter));
+			if (event->attr.probe.addr != 0) {
+				MSG("%saddr: 0x%" PRIx64, indent8, event->attr.probe.addr);
+			} else {
+				MSG("%soffset: 0x%" PRIx64, indent8, event->attr.probe.offset);
+				MSG("%ssymbol: %s", indent8, event->attr.probe.symbol_name);
+			}
+			break;
+		case LTTNG_EVENT_FUNCTION_ENTRY:
+			MSG("LTTNG_EVENT_FUNCTION_ENTRY");
+			MSG("%s%s (type: function)%s%s", indent6,
+					event->name, enabled_string(event->enabled),
+					filter_string(event->filter));
+			MSG("%ssymbol: \"%s\"", indent8, event->attr.ftrace.symbol_name);
+			break;
+		case LTTNG_EVENT_SYSCALL:
+			MSG("LTTNG_EVENT_SYSCALL");
+			MSG("%ssyscalls (type: syscall)%s%s", indent6,
+					enabled_string(event->enabled),
+					filter_string(event->filter));
+			break;
+		case LTTNG_EVENT_NOOP:
+			MSG("LTTNG_EVENT_NOOP");
+			MSG("%s (type: noop)%s%s", indent6,
+					enabled_string(event->enabled),
+					filter_string(event->filter));
+			break;
+		case LTTNG_EVENT_ALL:
+			MSG("LTTNG_EVENT_ALL");
+			/* We should never have "all" events in list. */
+			assert(0);
+			break;
 	}
 }
 
 static const char *field_type(struct lttng_event_field *field)
 {
 	switch(field->type) {
-	case LTTNG_EVENT_FIELD_INTEGER:
-		return "integer";
-	case LTTNG_EVENT_FIELD_ENUM:
-		return "enum";
-	case LTTNG_EVENT_FIELD_FLOAT:
-		return "float";
-	case LTTNG_EVENT_FIELD_STRING:
-		return "string";
-	case LTTNG_EVENT_FIELD_OTHER:
-	default:	/* fall-through */
-		return "unknown";
+		case LTTNG_EVENT_FIELD_INTEGER:
+			return "integer";
+		case LTTNG_EVENT_FIELD_ENUM:
+			return "enum";
+		case LTTNG_EVENT_FIELD_FLOAT:
+			return "float";
+		case LTTNG_EVENT_FIELD_STRING:
+			return "string";
+		case LTTNG_EVENT_FIELD_OTHER:
+		default:	/* fall-through */
+			return "unknown";
 	}
 }
 
@@ -326,328 +326,328 @@ static void print_event_field(struct lttng_event_field *field)
 		return;
 	}
 	MSG("%sfield: %s (%s)%s", indent8, field->field_name,
-		field_type(field), field->nowrite ? " [no write]" : "");
+			field_type(field), field->nowrite ? " [no write]" : "");
 }
 
 static int mi_print_pid_name(mi_writer *writer, pid_t cur_pid, char *cmdline)
 {
-        int ret;
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_ust_cmdline, cmdline);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_ust_curr_pid, cur_pid);
+	int ret;
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_ust_cmdline, cmdline);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_ust_curr_pid, cur_pid);
 
 end:
-        return ret;
+	return ret;
 }
 
 static int mi_print_events_tracepoint_loglevel(mi_writer *writer, struct lttng_event *event)
 {
-        int ret;
-        ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_name,              event->name);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_loglevel,                event->loglevel);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_event_enabled,       event->enabled);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_exclusion,   event->exclusion);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter,      event->filter);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_loglevel_str,            loglevel_string(event->loglevel));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str,       enabled_string(event->enabled));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_exclusion_str,     exclusion_string(event->exclusion));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str,        filter_string(event->filter));
-            
+	int ret;
+	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event->name);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_loglevel, event->loglevel);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_event_enabled, event->enabled);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_exclusion, event->exclusion);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter, event->filter);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_loglevel_str, loglevel_string(event->loglevel));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_exclusion_str, exclusion_string(event->exclusion));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str, filter_string(event->filter));
+
 end:
-        return ret;         
+	return ret;
 }
 
 static int mi_print_events_tracepoint_no_loglevel(mi_writer *writer, struct lttng_event *event)
 {
-        int ret;
-        ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_name,              event->name);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_event_enabled,       event->enabled);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_exclusion,   event->exclusion);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter,      event->filter); 
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str,       enabled_string(event->enabled));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_exclusion_str,     exclusion_string(event->exclusion));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str,        filter_string(event->filter)); 
-        
+	int ret;
+	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event->name);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_event_enabled, event->enabled);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_exclusion, event->exclusion);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter, event->filter);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_exclusion_str, exclusion_string(event->exclusion));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str, filter_string(event->filter));
+
 end:
-        return ret;
+	return ret;
 }
 
 static int mi_print_events_function_probe(mi_writer *writer, struct lttng_event *event,
-                                        const char * const mi_element)
+		const char * const mi_element)
 {
-        int ret;
-        ret = mi_writer_open_element(writer, mi_element);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_name,                      event->name);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_kernel_event_function,       event->enabled);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter,              event->filter); 
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str,               enabled_string(event->enabled));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str,                filter_string(event->filter)); 
-        if (ret) {
-                goto end;
-        }
-        
-        if (event->attr.probe.addr != 0) {
-                ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_addr, event->attr.probe.addr); 
-        } else {
-                ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_offset, event->attr.probe.offset); 
-                if (ret) {
-                        goto end;
-                }
-                
-                ret = mi_writer_write_element_string(writer, mi_element_list_event_symbol, event->attr.probe.symbol_name); 
-        }
+	int ret;
+	ret = mi_writer_open_element(writer, mi_element);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event->name);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_kernel_event_function, event->enabled);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter, event->filter);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str, filter_string(event->filter));
+	if (ret) {
+		goto end;
+	}
+
+	if (event->attr.probe.addr != 0) {
+		ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_addr, event->attr.probe.addr);
+	} else {
+		ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_offset, event->attr.probe.offset);
+		if (ret) {
+			goto end;
+		}
+
+		ret = mi_writer_write_element_string(writer, mi_element_list_event_symbol, event->attr.probe.symbol_name);
+	}
 end:
-        return ret;
+	return ret;
 }
 
 static int mi_print_events_function_entry(mi_writer *writer, struct lttng_event *event)
 {
-        int ret;
-        ret = mi_writer_open_element(writer, mi_element_list_kernel_event_function_entry);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_name,                      event->name);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_kernel_event_function,       event->enabled);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter,              event->filter); 
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str,               enabled_string(event->enabled));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str,                filter_string(event->filter));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_symbol,              event->attr.ftrace.symbol_name);
-        
+	int ret;
+	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_function_entry);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event->name);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_kernel_event_function, event->enabled);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter, event->filter);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str, filter_string(event->filter));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_symbol, event->attr.ftrace.symbol_name);
+
 end:
-        return ret;
+	return ret;
 }
 
-static int mi_print_events_syscall_noop(mi_writer *writer, struct lttng_event *event, 
-        const char * const mi_element)
+static int mi_print_events_syscall_noop(mi_writer *writer, struct lttng_event *event,
+		const char * const mi_element)
 {
-        int ret;
-        ret = mi_writer_open_element(writer, mi_element);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_kernel_event_function,       event->enabled);
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter,              event->filter); 
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str,               enabled_string(event->enabled));
-        if (ret) {
-                goto end;
-        }
-        
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str,                filter_string(event->filter));
-        
+	int ret;
+	ret = mi_writer_open_element(writer, mi_element);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_kernel_event_function, event->enabled);
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_unsigned_int(writer, mi_element_list_event_filter, event->filter); 
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
+	if (ret) {
+		goto end;
+	}
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str, filter_string(event->filter));
+
 end:
-        return ret;
+	return ret;
 }
 
 static int mi_print_jul_event(mi_writer *writer, struct lttng_event *event)
 {
-        int ret;
-        ret = mi_writer_command_open(writer, mi_element_list_ust_jul_events);
-        if (ret) {
-            goto error;
-        }
+	int ret;
+	ret = mi_writer_command_open(writer, mi_element_list_ust_jul_events);
+	if (ret) {
+		goto error;
+	}
 
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event->name);
-        if (ret) {
-                goto error;
-        }
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event->name);
+	if (ret) {
+		goto error;
+	}
 
-        ret = mi_writer_write_element_signed_int(writer, mi_element_list_event_enabled, event->enabled);
-        if (ret) {
-                goto error;
-        }
+	ret = mi_writer_write_element_signed_int(writer, mi_element_list_event_enabled, event->enabled);
+	if (ret) {
+		goto error;
+	}
 
-        ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
-        if (ret) {
-                goto error;
-        }
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_enabled_str, enabled_string(event->enabled));
+	if (ret) {
+		goto error;
+	}
 
-        ret = mi_writer_close_element(writer);
+	ret = mi_writer_close_element(writer);
 
 error:
-        return ret;
+	return ret;
 }
 
 static int mi_print_events(mi_writer *writer, struct lttng_event *event)
 {
-    int ret = 0;
-    
-    if(writer) {
-    switch (event->type) {      
-	case LTTNG_EVENT_TRACEPOINT:
-	{
-		if (event->loglevel != -1) {
-                        ret = mi_print_events_tracepoint_loglevel(writer, event);
-                        if (ret) {
-                                goto error;
-                        }
-		} else {
-                        ret = mi_print_events_tracepoint_no_loglevel(writer, event);
-                        if (ret) {
-                                goto error;
-                        }
+	int ret = 0;
+
+	if(writer) {
+		switch (event->type) {
+			case LTTNG_EVENT_TRACEPOINT:
+				{
+					if (event->loglevel != -1) {
+						ret = mi_print_events_tracepoint_loglevel(writer, event);
+						if (ret) {
+							goto error;
+						}
+					} else {
+						ret = mi_print_events_tracepoint_no_loglevel(writer, event);
+						if (ret) {
+							goto error;
+						}
+					}
+					break;
+				}
+			case LTTNG_EVENT_FUNCTION:
+				ret = mi_print_events_function_probe(writer, event, mi_element_list_kernel_event_function);
+				if (ret) {
+					goto error;
+				}
+				break;
+			case LTTNG_EVENT_PROBE:
+				ret = mi_print_events_function_probe(writer, event, mi_element_list_kernel_event_probe);
+				if (ret) {
+					goto error;
+				}
+				break;
+			case LTTNG_EVENT_FUNCTION_ENTRY:
+				ret = mi_print_events_function_entry(writer, event);
+				if (ret) {
+					goto error;
+				}
+				break;
+			case LTTNG_EVENT_SYSCALL:
+				ret = mi_print_events_syscall_noop(writer, event, mi_element_list_kernel_event_syscall);
+				if (ret) {
+					goto error;
+				}
+				break;
+			case LTTNG_EVENT_NOOP:
+				ret = mi_print_events_syscall_noop(writer, event, mi_element_list_kernel_event_noop);
+				if (ret) {
+					goto error;
+				}
+				break;
+			case LTTNG_EVENT_ALL:
+				// We should never have "all" events in list.
+				assert(0);
+				break;
 		}
-		break;
 	}
-	case LTTNG_EVENT_FUNCTION:
-                ret = mi_print_events_function_probe(writer, event, mi_element_list_kernel_event_function);
-                if (ret) {
-                        goto error;
-                }
-		break;
-	case LTTNG_EVENT_PROBE:
-                ret = mi_print_events_function_probe(writer, event, mi_element_list_kernel_event_probe);
-                if (ret) {
-                        goto error;
-                }
-		break;
-	case LTTNG_EVENT_FUNCTION_ENTRY:
-                ret = mi_print_events_function_entry(writer, event);
-                if (ret) {
-                        goto error;
-                }
-		break;
-	case LTTNG_EVENT_SYSCALL:
-                ret = mi_print_events_syscall_noop(writer, event, mi_element_list_kernel_event_syscall);
-                if (ret) {
-                        goto error;
-                }
-		break;
-	case LTTNG_EVENT_NOOP:
-                ret = mi_print_events_syscall_noop(writer, event, mi_element_list_kernel_event_noop);
-                if (ret) {
-                        goto error;
-                }
-		break;
-	case LTTNG_EVENT_ALL:
-		// We should never have "all" events in list.
-		assert(0);
-		break; 
-	}
-    }
-    
+
 error:
-    return ret;
+	return ret;
 }
 
 static int list_jul_events(mi_writer *mi_writer)
@@ -675,53 +675,53 @@ static int list_jul_events(mi_writer *mi_writer)
 		lttng_destroy_handle(handle);
 		return size;
 	}
-        
-        if (mi_writer && opt_xml) {
-            for (i = 0; i < size; i++) {
-                    ret = mi_writer_command_open(mi_writer, mi_element_list_ust_jul_events);
-                    if (ret) {
-                        goto error;
-                    }
 
-                    if (cur_pid != event_list[i].pid) {
-                            cur_pid = event_list[i].pid;
-                            cmdline = get_cmdline_by_pid(cur_pid);
-                            ret = mi_print_pid_name(mi_writer, cur_pid, cmdline);
-                            free(cmdline);
-                            if (ret) {
-                                    goto error;
-                            }
-                    }
+	if (mi_writer && opt_xml) {
+		for (i = 0; i < size; i++) {
+			ret = mi_writer_command_open(mi_writer, mi_element_list_ust_jul_events);
+			if (ret) {
+				goto error;
+			}
 
-                    ret = mi_writer_write_element_string(mi_writer, mi_element_list_event_name, event_list[i].name);
-                    if (ret) {
-                            goto error;
-                    }
+			if (cur_pid != event_list[i].pid) {
+				cur_pid = event_list[i].pid;
+				cmdline = get_cmdline_by_pid(cur_pid);
+				ret = mi_print_pid_name(mi_writer, cur_pid, cmdline);
+				free(cmdline);
+				if (ret) {
+					goto error;
+				}
+			}
 
-                    ret = mi_writer_close_element(mi_writer);
-                    if (ret) {
-                            goto error;
-                    }
-            }
-        } else {
-                MSG("JUL events (Logger name):\n-------------------------");
+			ret = mi_writer_write_element_string(mi_writer, mi_element_list_event_name, event_list[i].name);
+			if (ret) {
+				goto error;
+			}
 
-                if (size == 0) {
-                        MSG("None");
-                }
+			ret = mi_writer_close_element(mi_writer);
+			if (ret) {
+				goto error;
+			}
+		}
+	} else {
+		MSG("JUL events (Logger name):\n-------------------------");
 
-                for (i = 0; i < size; i++) {
-                        if (cur_pid != event_list[i].pid) {
-                                cur_pid = event_list[i].pid;
-                                cmdline = get_cmdline_by_pid(cur_pid);
-                                MSG("\nPID: %d - Name: %s", cur_pid, cmdline);
-                                free(cmdline);
-                        }
-                        MSG("%s- %s", indent6, event_list[i].name);
-                }
+		if (size == 0) {
+			MSG("None");
+		}
 
-                MSG("");
-        }
+		for (i = 0; i < size; i++) {
+			if (cur_pid != event_list[i].pid) {
+				cur_pid = event_list[i].pid;
+				cmdline = get_cmdline_by_pid(cur_pid);
+				MSG("\nPID: %d - Name: %s", cur_pid, cmdline);
+				free(cmdline);
+			}
+			MSG("%s- %s", indent6, event_list[i].name);
+		}
+
+		MSG("");
+	}
 	free(event_list);
 	lttng_destroy_handle(handle);
 
@@ -761,48 +761,48 @@ static int list_ust_events(mi_writer *mi_writer)
 		lttng_destroy_handle(handle);
 		return size;
 	}
-        
-        if (mi_writer && opt_xml) {
-            for (i = 0; i < size; i++) {
-                        ret = mi_print_events(mi_writer, &event_list[i]);
-                        if (ret) {
-                                goto error;
-                        }
-                        
-                        if (cur_pid != event_list[i].pid) {
-                                cur_pid = event_list[i].pid;
-                                cmdline = get_cmdline_by_pid(cur_pid);
-                                ret = mi_print_pid_name(mi_writer, cur_pid, cmdline);
-                                free(cmdline);
-                                if (ret) {
-                                        goto error;
-                                }
-                        }
-                        
-                        ret = mi_writer_close_element(mi_writer);
-                        if (ret) {
-                                goto error;
-                        }
-                }
-        } else {
-                MSG("UST events:\n-------------");
 
-                if (size == 0) {
-                        MSG("None");
-                }
+	if (mi_writer && opt_xml) {
+		for (i = 0; i < size; i++) {
+			ret = mi_print_events(mi_writer, &event_list[i]);
+			if (ret) {
+				goto error;
+			}
 
-                for (i = 0; i < size; i++) {
-                        if (cur_pid != event_list[i].pid) {
-                                cur_pid = event_list[i].pid;
-                                cmdline = get_cmdline_by_pid(cur_pid);
-                                MSG("\nPID: %d - Name: %s", cur_pid, cmdline);
-                                free(cmdline);
-                        }
-                        print_events(&event_list[i]);
-                }
+			if (cur_pid != event_list[i].pid) {
+				cur_pid = event_list[i].pid;
+				cmdline = get_cmdline_by_pid(cur_pid);
+				ret = mi_print_pid_name(mi_writer, cur_pid, cmdline);
+				free(cmdline);
+				if (ret) {
+					goto error;
+				}
+			}
 
-                MSG("");
-        }
+			ret = mi_writer_close_element(mi_writer);
+			if (ret) {
+				goto error;
+			}
+		}
+	} else {
+		MSG("UST events:\n-------------");
+
+		if (size == 0) {
+			MSG("None");
+		}
+
+		for (i = 0; i < size; i++) {
+			if (cur_pid != event_list[i].pid) {
+				cur_pid = event_list[i].pid;
+				cmdline = get_cmdline_by_pid(cur_pid);
+				MSG("\nPID: %d - Name: %s", cur_pid, cmdline);
+				free(cmdline);
+			}
+			print_events(&event_list[i]);
+		}
+
+		MSG("");
+	}
 	free(event_list);
 	lttng_destroy_handle(handle);
 
@@ -845,34 +845,34 @@ static int list_ust_event_fields(void)
 		lttng_destroy_handle(handle);
 		return size;
 	}
-        
-        if (opt_xml) {
-        } else {
-                MSG("UST events:\n-------------");
 
-                if (size == 0) {
-                        MSG("None");
-                }
+	if (opt_xml) {
+	} else {
+		MSG("UST events:\n-------------");
 
-                for (i = 0; i < size; i++) {
-                        if (cur_pid != event_field_list[i].event.pid) {
-                                cur_pid = event_field_list[i].event.pid;
-                                cmdline = get_cmdline_by_pid(cur_pid);
-                                MSG("\nPID: %d - Name: %s", cur_pid, cmdline);
-                                free(cmdline);
-                                /* Wipe current event since we are about to print a new PID. */
-                                memset(&cur_event, 0, sizeof(cur_event));
-                        }
-                        if (strcmp(cur_event.name, event_field_list[i].event.name) != 0) {
-                                print_events(&event_field_list[i].event);
-                                memcpy(&cur_event, &event_field_list[i].event,
-                                        sizeof(cur_event));
-                        }
-                        print_event_field(&event_field_list[i]);
-                }
+		if (size == 0) {
+			MSG("None");
+		}
 
-                MSG("");
-        }
+		for (i = 0; i < size; i++) {
+			if (cur_pid != event_field_list[i].event.pid) {
+				cur_pid = event_field_list[i].event.pid;
+				cmdline = get_cmdline_by_pid(cur_pid);
+				MSG("\nPID: %d - Name: %s", cur_pid, cmdline);
+				free(cmdline);
+				/* Wipe current event since we are about to print a new PID. */
+				memset(&cur_event, 0, sizeof(cur_event));
+			}
+			if (strcmp(cur_event.name, event_field_list[i].event.name) != 0) {
+				print_events(&event_field_list[i].event);
+				memcpy(&cur_event, &event_field_list[i].event,
+						sizeof(cur_event));
+			}
+			print_event_field(&event_field_list[i]);
+		}
+
+		MSG("");
+	}
 	free(event_field_list);
 	lttng_destroy_handle(handle);
 
@@ -910,33 +910,33 @@ static int list_kernel_events(mi_writer *mi_writer)
 		lttng_destroy_handle(handle);
 		return size;
 	}
-        
-        if(mi_writer && opt_xml) {
-                for (i = 0; i < size; i++) {
-                        ret = mi_print_events(mi_writer, &event_list[i]);
-                        if (ret) {
-                                goto error;
-                        }
-                        ret = mi_writer_close_element(mi_writer);
-                        if (ret) {
-                                goto error;
-                        }
-                }
-        } else {
-                MSG("Kernel events:\n-------------");
 
-                for (i = 0; i < size; i++) {
-                        print_events(&event_list[i]);
-                }
+	if(mi_writer && opt_xml) {
+		for (i = 0; i < size; i++) {
+			ret = mi_print_events(mi_writer, &event_list[i]);
+			if (ret) {
+				goto error;
+			}
+			ret = mi_writer_close_element(mi_writer);
+			if (ret) {
+				goto error;
+			}
+		}
+	} else {
+		MSG("Kernel events:\n-------------");
 
-                MSG("");
-        }
-        
-        free(event_list);
+		for (i = 0; i < size; i++) {
+			print_events(&event_list[i]);
+		}
 
-        lttng_destroy_handle(handle);
-        return CMD_SUCCESS;
-        
+		MSG("");
+	}
+
+	free(event_list);
+
+	lttng_destroy_handle(handle);
+	return CMD_SUCCESS;
+
 error:
 	lttng_destroy_handle(handle);
 	return -1;
@@ -958,28 +958,28 @@ static int list_session_jul_events(mi_writer *mi_writer)
 		ERR("%s", lttng_strerror(ret));
 		goto error;
 	}
-        
-        if (opt_xml) {
-                for (i = 0; i < count; i++) {
-                        ret = mi_print_jul_event(mi_writer, &events[i]);
-                        if (ret) {
-                                goto error;
-                        }
-                }
-        } else {
-                MSG("Events (Logger name):\n---------------------");
-                if (count == 0) {
-                        MSG("%sNone\n", indent6);
-                        goto end;
-                }
 
-                for (i = 0; i < count; i++) {
-                        MSG("%s- %s%s", indent4, events[i].name,
-                                        enabled_string(events[i].enabled));
-                }
+	if (opt_xml) {
+		for (i = 0; i < count; i++) {
+			ret = mi_print_jul_event(mi_writer, &events[i]);
+			if (ret) {
+				goto error;
+			}
+		}
+	} else {
+		MSG("Events (Logger name):\n---------------------");
+		if (count == 0) {
+			MSG("%sNone\n", indent6);
+			goto end;
+		}
 
-                MSG("");
-        }
+		for (i = 0; i < count; i++) {
+			MSG("%s- %s%s", indent4, events[i].name,
+					enabled_string(events[i].enabled));
+		}
+
+		MSG("");
+	}
 end:
 	free(events);
 	ret = CMD_SUCCESS;
@@ -1002,21 +1002,21 @@ static int list_events(const char *channel_name)
 		ERR("%s", lttng_strerror(ret));
 		goto error;
 	}
-        
-        if (opt_xml) { 
-        } else {
-            MSG("\n%sEvents:", indent4);
-            if (count == 0) {
-                    MSG("%sNone\n", indent6);
-                    goto end;
-            }
 
-            for (i = 0; i < count; i++) {
-                    print_events(&events[i]);
-            }
+	if (opt_xml) { 
+	} else {
+		MSG("\n%sEvents:", indent4);
+		if (count == 0) {
+			MSG("%sNone\n", indent6);
+			goto end;
+		}
 
-            MSG("");
-        }
+		for (i = 0; i < count; i++) {
+			print_events(&events[i]);
+		}
+
+		MSG("");
+	}
 
 end:
 	free(events);
@@ -1065,15 +1065,15 @@ static int list_channels(const char *channel_name)
 	count = lttng_list_channels(handle, &channels);
 	if (count < 0) {
 		switch (-count) {
-		case LTTNG_ERR_KERN_CHAN_NOT_FOUND:
-			ret = CMD_SUCCESS;
-			WARN("No kernel channel");
-			break;
-		default:
-			/* We had a real error */
-			ret = count;
-			ERR("%s", lttng_strerror(ret));
-			break;
+			case LTTNG_ERR_KERN_CHAN_NOT_FOUND:
+				ret = CMD_SUCCESS;
+				WARN("No kernel channel");
+				break;
+			default:
+				/* We had a real error */
+				ret = count;
+				ERR("%s", lttng_strerror(ret));
+				break;
 		}
 		goto error_channels;
 	}
@@ -1201,17 +1201,17 @@ static int list_domains(const char *session_name)
 
 	for (i = 0; i < count; i++) {
 		switch (domains[i].type) {
-		case LTTNG_DOMAIN_KERNEL:
-			MSG("  - Kernel");
-			break;
-		case LTTNG_DOMAIN_UST:
-			MSG("  - UST global");
-			break;
-		case LTTNG_DOMAIN_JUL:
-			MSG("  - JUL (Java Util Logging)");
-			break;
-		default:
-			break;
+			case LTTNG_DOMAIN_KERNEL:
+				MSG("  - Kernel");
+				break;
+			case LTTNG_DOMAIN_UST:
+				MSG("  - UST global");
+				break;
+			case LTTNG_DOMAIN_JUL:
+				MSG("  - JUL (Java Util Logging)");
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -1232,7 +1232,7 @@ int cmd_list(int argc, const char **argv)
 	static poptContext pc;
 	struct lttng_domain domain;
 	struct lttng_domain *domains = NULL;
-        mi_writer *mi_writer = NULL;
+	mi_writer *mi_writer = NULL;
 
 	memset(&domain, 0, sizeof(domain));
 
@@ -1247,35 +1247,35 @@ int cmd_list(int argc, const char **argv)
 
 	while ((opt = poptGetNextOpt(pc)) != -1) {
 		switch (opt) {
-		case OPT_HELP:
-			usage(stdout);
+			case OPT_HELP:
+				usage(stdout);
+				goto end;
+			case OPT_USERSPACE:
+				opt_userspace = 1;
+				break;
+			case OPT_LIST_OPTIONS:
+				list_cmd_options(stdout, long_options);
+				goto end;
+			default:
+				usage(stderr);
+				ret = CMD_UNDEFINED;
+				goto end;
+		}
+	}
+
+	if(opt_xml) {
+		mi_writer = mi_writer_create(fileno(stdout));
+		if (!mi_writer) {
+			ret = LTTNG_ERR_NOMEM;
 			goto end;
-		case OPT_USERSPACE:
-			opt_userspace = 1;
-			break;
-		case OPT_LIST_OPTIONS:
-			list_cmd_options(stdout, long_options);
-			goto end;
-		default:
-			usage(stderr);
-			ret = CMD_UNDEFINED;
+		}
+
+		ret = mi_writer_command_open(mi_writer, mi_element_command_list);
+		if (ret) {
 			goto end;
 		}
 	}
 
-        if(opt_xml) {
-            mi_writer = mi_writer_create(fileno(stdout));
-            if (!mi_writer) {
-                ret = LTTNG_ERR_NOMEM;
-                goto end;
-            }
-            
-            ret = mi_writer_command_open(mi_writer, mi_element_command_list);
-            if (ret) {
-                goto end;
-            }
-        }
-        
 	/* Get session name (trailing argument) */
 	session_name = poptGetArg(pc);
 	DBG2("Session name: %s", session_name);
@@ -1362,21 +1362,21 @@ int cmd_list(int argc, const char **argv)
 
 			for (i = 0; i < nb_domain; i++) {
 				switch (domains[i].type) {
-				case LTTNG_DOMAIN_KERNEL:
-					MSG("=== Domain: Kernel ===\n");
-					break;
-				case LTTNG_DOMAIN_UST:
-					MSG("=== Domain: UST global ===\n");
-					MSG("Buffer type: %s\n",
-							domains[i].buf_type ==
-							LTTNG_BUFFER_PER_PID ? "per PID" : "per UID");
-					break;
-				case LTTNG_DOMAIN_JUL:
-					MSG("=== Domain: JUL (Java Util Logging) ===\n");
-					break;
-				default:
-					MSG("=== Domain: Unimplemented ===\n");
-					break;
+					case LTTNG_DOMAIN_KERNEL:
+						MSG("=== Domain: Kernel ===\n");
+						break;
+					case LTTNG_DOMAIN_UST:
+						MSG("=== Domain: UST global ===\n");
+						MSG("Buffer type: %s\n",
+								domains[i].buf_type ==
+								LTTNG_BUFFER_PER_PID ? "per PID" : "per UID");
+						break;
+					case LTTNG_DOMAIN_JUL:
+						MSG("=== Domain: JUL (Java Util Logging) ===\n");
+						break;
+					default:
+						MSG("=== Domain: Unimplemented ===\n");
+						break;
 				}
 
 				/* Clean handle before creating a new one */
@@ -1407,12 +1407,12 @@ int cmd_list(int argc, const char **argv)
 	}
 
 end:
-        if (opt_xml) {
-                /* Preserve original error code */
-                ret = mi_writer_command_close(mi_writer);
-                mi_writer_destroy(mi_writer);
-                ret = ret ? ret : LTTNG_ERR_MI_IO_FAIL;
-        }
+	if (opt_xml) {
+		/* Preserve original error code */
+		ret = mi_writer_command_close(mi_writer);
+		mi_writer_destroy(mi_writer);
+		ret = ret ? ret : LTTNG_ERR_MI_IO_FAIL;
+	}
 
 	free(domains);
 	if (handle) {
