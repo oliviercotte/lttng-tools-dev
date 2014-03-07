@@ -230,7 +230,6 @@ static void print_events(struct lttng_event *event)
 		case LTTNG_EVENT_TRACEPOINT:
 			{
 				if (event->loglevel != -1) {
-					MSG("LTTNG_EVENT_TRACEPOINT");
 					MSG("%s%s (loglevel: %s (%d)) (type: tracepoint)%s%s%s",
 							indent6,
 							event->name,
@@ -250,7 +249,6 @@ static void print_events(struct lttng_event *event)
 				break;
 			}
 		case LTTNG_EVENT_FUNCTION:
-			MSG("LTTNG_EVENT_FUNCTION");
 			MSG("%s%s (type: function)%s%s", indent6,
 					event->name, enabled_string(event->enabled),
 					filter_string(event->filter));
@@ -262,7 +260,6 @@ static void print_events(struct lttng_event *event)
 			}
 			break;
 		case LTTNG_EVENT_PROBE:
-			MSG("LTTNG_EVENT_PROBE");
 			MSG("%s%s (type: probe)%s%s", indent6,
 					event->name, enabled_string(event->enabled),
 					filter_string(event->filter));
@@ -274,26 +271,22 @@ static void print_events(struct lttng_event *event)
 			}
 			break;
 		case LTTNG_EVENT_FUNCTION_ENTRY:
-			MSG("LTTNG_EVENT_FUNCTION_ENTRY");
 			MSG("%s%s (type: function)%s%s", indent6,
 					event->name, enabled_string(event->enabled),
 					filter_string(event->filter));
 			MSG("%ssymbol: \"%s\"", indent8, event->attr.ftrace.symbol_name);
 			break;
 		case LTTNG_EVENT_SYSCALL:
-			MSG("LTTNG_EVENT_SYSCALL");
 			MSG("%ssyscalls (type: syscall)%s%s", indent6,
 					enabled_string(event->enabled),
 					filter_string(event->filter));
 			break;
 		case LTTNG_EVENT_NOOP:
-			MSG("LTTNG_EVENT_NOOP");
 			MSG("%s (type: noop)%s%s", indent6,
 					enabled_string(event->enabled),
 					filter_string(event->filter));
 			break;
 		case LTTNG_EVENT_ALL:
-			MSG("LTTNG_EVENT_ALL");
 			/* We should never have "all" events in list. */
 			assert(0);
 			break;
