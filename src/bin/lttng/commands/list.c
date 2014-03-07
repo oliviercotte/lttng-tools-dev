@@ -85,6 +85,7 @@ static void usage(FILE *ofp)
 	fprintf(ofp, "Without a session, -u lists available userspace events\n");
 	fprintf(ofp, "\n");
 	fprintf(ofp, "  -h, --help              Show this help\n");
+        fprintf(ofp, "  -x, --xml               Machine interface : xml\n");
 	fprintf(ofp, "      --list-options      Simple listing of options\n");
 	fprintf(ofp, "  -k, --kernel            Select kernel domain\n");
 	fprintf(ofp, "  -u, --userspace         Select user-space domain.\n");
