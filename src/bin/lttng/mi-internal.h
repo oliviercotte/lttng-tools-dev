@@ -62,6 +62,7 @@ const char * const mi_element_list_event_symbol;
 
 // Strings related to command: list -u (userspace)
 const char * const mi_element_list_ust_jul_events;
+const char * const mi_element_list_ust_jul_event;
 const char * const mi_element_list_ust_curr_pid;
 const char * const mi_element_list_ust_cmdline;
 

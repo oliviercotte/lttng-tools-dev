@@ -36,13 +36,13 @@ const char * const mi_element_version_patch_level               = "patchLevel";
 const char * const mi_element_version_description               = "description";
 
 /* Strings related to command: list */
-const char * const mi_element_list_kernel_event_tracepoint      = "LTTNG_EVENT_TRACEPOINT";
-const char * const mi_element_list_kernel_event_function        = "LTTNG_EVENT_FUNCTION";
-const char * const mi_element_list_kernel_event_probe           = "LTTNG_EVENT_PROBE";
-const char * const mi_element_list_kernel_event_function_entry  = "LTTNG_EVENT_FUNCTION_ENTRY";
-const char * const mi_element_list_kernel_event_syscall         = "LTTNG_EVENT_SYSCALL";
-const char * const mi_element_list_kernel_event_noop            = "LTTNG_EVENT_NOOP";
-const char * const mi_element_list_kernel_event_all             = "LTTNG_EVENT_ALL";
+const char * const mi_element_list_kernel_event_tracepoint      = "TRACEPOINT";
+const char * const mi_element_list_kernel_event_function        = "FUNCTION";
+const char * const mi_element_list_kernel_event_probe           = "PROBE";
+const char * const mi_element_list_kernel_event_function_entry  = "FUNCTION_ENTRY";
+const char * const mi_element_list_kernel_event_syscall         = "SYSCALL";
+const char * const mi_element_list_kernel_event_noop            = "NOOP";
+const char * const mi_element_list_kernel_event_all             = "ALL";
 const char * const mi_element_list_events_flag                  = "events";
 const char * const mi_element_list_event_flag                   = "event";
 const char * const mi_element_list_event_type                   = "type";
@@ -61,6 +61,7 @@ const char * const mi_element_list_event_offset                 = "offset";
 const char * const mi_element_list_event_symbol                 = "symbol";
 
 const char * const mi_element_list_ust_jul_events               = "jul_events";
+const char * const mi_element_list_ust_jul_event                = "jul_event";
 const char * const mi_element_list_ust_curr_pid                 = "curr_pid";
 const char * const mi_element_list_ust_cmdline                  = "cmdline";
 

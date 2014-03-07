@@ -584,7 +584,7 @@ end:
 static int mi_print_jul_event(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_command_open(writer, mi_element_list_ust_jul_events);
+	ret = mi_writer_command_open(writer, mi_element_list_ust_jul_event);
 	if (ret) {
 		goto error;
 	}
@@ -700,12 +700,18 @@ static int list_jul_events(mi_writer *writer)
 		return size;
 	}
 
-	if (writer && opt_xml) {
-		for (i = 0; i < size; i++) {
-			ret = mi_writer_command_open(writer, mi_element_list_ust_jul_events);
-			if (ret) {
-				goto error;
-			}
+	if (opt_xml) {
+            if(writer) {
+                ret = mi_writer_open_element(writer, mi_element_list_ust_jul_events);
+                if (ret) {
+                        goto error_xml;
+		}
+                
+                for (i = 0; i < size; i++) {
+                        ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_ust_jul_events);
+                        if (ret) {
+                                goto error_xml;
+                        }
 
 			if (cur_pid != event_list[i].pid) {
 				cur_pid = event_list[i].pid;
@@ -713,20 +719,28 @@ static int list_jul_events(mi_writer *writer)
 				ret = mi_print_pid_name(writer, cur_pid, cmdline);
 				free(cmdline);
 				if (ret) {
-					goto error;
+					goto error_xml;
 				}
 			}
 
 			ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event_list[i].name);
 			if (ret) {
-				goto error;
+				goto error_xml;
 			}
 
 			ret = mi_writer_close_element(writer);
 			if (ret) {
-				goto error;
+				goto error_xml;
 			}
 		}
+                
+                ret = mi_writer_close_element(writer);
+                if (ret) {
+                        goto error_xml;
+		}
+            } else {
+                goto error_xml; 
+            }	
 	} else {
 		MSG("JUL events (Logger name):\n-------------------------");
 
@@ -746,10 +760,11 @@ static int list_jul_events(mi_writer *writer)
 
 		MSG("");
 	}
+        
+error_xml:
 	free(event_list);
 	lttng_destroy_handle(handle);
-
-	return CMD_SUCCESS;
+        return ret;
 
 error:
 	lttng_destroy_handle(handle);
@@ -786,11 +801,17 @@ static int list_ust_events(mi_writer *writer)
 		return size;
 	}
 
-	if (writer && opt_xml) {
-		for (i = 0; i < size; i++) {
+	if (opt_xml) {
+            if(writer) {
+                ret = mi_writer_open_element(writer, mi_element_list_events_flag);
+                if (ret) {
+                        goto error_xml;
+		}
+                
+                for (i = 0; i < size; i++) {
 			ret = mi_print_event(writer, &event_list[i]);
 			if (ret) {
-				goto error;
+				goto error_xml;
 			}
 
 			if (cur_pid != event_list[i].pid) {
@@ -799,15 +820,24 @@ static int list_ust_events(mi_writer *writer)
 				ret = mi_print_pid_name(writer, cur_pid, cmdline);
 				free(cmdline);
 				if (ret) {
-					goto error;
+					goto error_xml;
 				}
 			}
 
 			ret = mi_writer_close_element(writer);
 			if (ret) {
-				goto error;
+				goto error_xml;
 			}
 		}
+                
+                ret = mi_writer_close_element(writer);
+                if (ret) {
+                        goto error_xml;
+		}
+            }
+            else {
+                goto error_xml;
+            }
 	} else {
 		MSG("UST events:\n-------------");
 
@@ -827,10 +857,11 @@ static int list_ust_events(mi_writer *writer)
 
 		MSG("");
 	}
+        
+error_xml:
 	free(event_list);
 	lttng_destroy_handle(handle);
-
-	return CMD_SUCCESS;
+	return ret;
 
 error:
 	lttng_destroy_handle(handle);
@@ -935,7 +966,8 @@ static int list_kernel_events(mi_writer *writer)
 		return size;
 	}
 
-	if(writer && opt_xml) {
+	if(opt_xml) {
+            if(writer) {
                 ret = mi_writer_open_element(writer, mi_element_list_events_flag);
                 if (ret) {
                         goto error_xml;
@@ -956,6 +988,10 @@ static int list_kernel_events(mi_writer *writer)
                 if (ret) {
                         goto error_xml;
 		}
+            } else {
+                // Invalid writer
+                goto error_xml;
+            }
 	} else {
 		MSG("Kernel events:\n-------------");
 
@@ -968,7 +1004,6 @@ static int list_kernel_events(mi_writer *writer)
 
 error_xml:
 	free(event_list);
-
 	lttng_destroy_handle(handle);
 	return ret;
 
@@ -1441,7 +1476,10 @@ int cmd_list(int argc, const char **argv)
 		}
 	}
 
-        ret = mi_writer_command_close(writer);
+        if(opt_xml) {
+            ret = mi_writer_command_close(writer);
+        }
+        
 end:
 	if (writer && mi_writer_destroy(writer)) {
 		/* Preserve original error code */
