@@ -89,7 +89,18 @@ end:
 
 int mi_writer_command_close(mi_writer *writer)
 {
-    return mi_writer_close_element(writer);
+	int ret;
+
+	/*  current command under MI output */
+    ret = mi_writer_close_element(writer);
+	if (ret) {
+		goto end;
+	}
+
+	/* close : <command> */
+	ret = mi_writer_close_element(writer);
+end:
+    return ret;
 }
 
 int mi_writer_open_element(mi_writer *writer,

@@ -340,7 +340,7 @@ end:
 static int mi_print_event_tracepoint_loglevel(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_kernel_event_tracepoint);
 	if (ret) {
 		goto end;
 	}
@@ -394,7 +394,7 @@ end:
 static int mi_print_event_tracepoint_no_loglevel(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_kernel_event_tracepoint);
 	if (ret) {
 		goto end;
 	}
@@ -439,7 +439,7 @@ static int mi_print_event_function_probe(mi_writer *writer, struct lttng_event *
 		const char * const mi_element)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element);
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element);
 	if (ret) {
 		goto end;
 	}
@@ -486,7 +486,7 @@ end:
 static int mi_print_event_function_entry(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_function_entry);
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_kernel_event_function_entry);
 	if (ret) {
 		goto end;
 	}
@@ -526,7 +526,7 @@ static int mi_print_event_syscall_noop(mi_writer *writer, struct lttng_event *ev
 		const char * const mi_element)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element);
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element);
 	if (ret) {
 		goto end;
 	}
@@ -555,7 +555,8 @@ end:
 static int mi_print_jul_event(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_command_open(writer, mi_element_list_ust_jul_events);
+
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_ust_jul_events);
 	if (ret) {
 		goto error;
 	}
@@ -575,8 +576,6 @@ static int mi_print_jul_event(mi_writer *writer, struct lttng_event *event)
 		goto error;
 	}
 
-	ret = mi_writer_close_element(writer);
-
 error:
 	return ret;
 }
@@ -586,11 +585,16 @@ static int mi_print_event(mi_writer *writer, struct lttng_event *event)
 	int ret = 0;
 
 	if(writer) {
+		ret = mi_writer_open_element(writer, mi_element_list_event);
+		if (ret) {
+			goto error;
+		}
+
 		switch (event->type) {
 			case LTTNG_EVENT_TRACEPOINT:
 				{
 					if (event->loglevel != -1) {
-						ret = mi_print_events_tracepoint_loglevel(writer, event);
+						ret = mi_print_event_tracepoint_loglevel(writer, event);
 						if (ret) {
 							goto error;
 						}
@@ -639,6 +643,8 @@ static int mi_print_event(mi_writer *writer, struct lttng_event *event)
 		}
 	}
 
+	ret = mi_writer_close_element(writer);
+
 error:
 	return ret;
 }
@@ -671,7 +677,7 @@ static int list_jul_events(mi_writer *mi_writer)
 
 	if (mi_writer && opt_xml) {
 		for (i = 0; i < size; i++) {
-			ret = mi_writer_command_open(mi_writer, mi_element_list_ust_jul_events);
+			ret = mi_writer_open_element(mi_writer, mi_element_list_ust_jul_events);
 			if (ret) {
 				goto error;
 			}
@@ -777,10 +783,10 @@ static int list_ust_events(mi_writer *mi_writer)
 				}
 			}
 
-			ret = mi_writer_close_element(mi_writer);
-			if (ret) {
-				goto error;
-			}
+		}
+		ret = mi_writer_close_element(mi_writer);
+		if (ret) {
+			goto error;
 		}
 	} else {
 		MSG("UST events:\n-------------");
@@ -882,7 +888,7 @@ error:
 }
 
 /*
- * Ask for all trace events in the kernel and pretty print them.
+ * Ask for all trace events in the kernel and pretty print them or output some ugly MI.
  */
 static int list_kernel_events(mi_writer *mi_writer)
 {
@@ -909,17 +915,28 @@ static int list_kernel_events(mi_writer *mi_writer)
 		return size;
 	}
 
-	if(mi_writer && opt_xml) {
-		for (i = 0; i < size; i++) {
-			ret = mi_print_events(mi_writer, &event_list[i]);
+	if(opt_xml) {
+		if (mi_writer) {
+			ret = mi_writer_open_element(mi_writer, mi_element_list_events);
 			if (ret) {
 				goto error;
 			}
+			for (i = 0; i < size; i++) {
+				ret = mi_print_event(mi_writer, &event_list[i]);
+				if (ret) {
+					goto error;
+				}
+			}
+
 			ret = mi_writer_close_element(mi_writer);
 			if (ret) {
 				goto error;
 			}
+		} else {
+			ret = LTTNG_ERR_MI_IO_FAIL;
+			goto error;
 		}
+
 	} else {
 		MSG("Kernel events:\n-------------");
 
@@ -930,14 +947,10 @@ static int list_kernel_events(mi_writer *mi_writer)
 		MSG("");
 	}
 
-	free(event_list);
-
-	lttng_destroy_handle(handle);
-	return CMD_SUCCESS;
-
 error:
+	free(event_list);
 	lttng_destroy_handle(handle);
-	return -1;
+	return ret;
 }
 
 /*
@@ -958,12 +971,28 @@ static int list_session_jul_events(mi_writer *mi_writer)
 	}
 
 	if (opt_xml) {
-		for (i = 0; i < count; i++) {
-			ret = mi_print_jul_event(mi_writer, &events[i]);
+		if (mi_writer) {
+			ret = mi_writer_open_element(mi_writer, mi_element_list_events);
 			if (ret) {
 				goto error;
 			}
+
+			for (i = 0; i < count; i++) {
+				ret = mi_print_jul_event(mi_writer, &events[i]);
+				if (ret) {
+					goto error;
+				}
+			}
+
+			ret = mi_writer_close_element(mi_writer);
+			if (ret) {
+				goto error;
+			}
+		} else {
+			ret = LTTNG_ERR_MI_IO_FAIL;
+			goto error;
 		}
+
 	} else {
 		MSG("Events (Logger name):\n---------------------");
 		if (count == 0) {
@@ -979,10 +1008,10 @@ static int list_session_jul_events(mi_writer *mi_writer)
 		MSG("");
 	}
 end:
-	free(events);
 	ret = CMD_SUCCESS;
 
 error:
+	free(events);
 	return ret;
 }
 
@@ -1001,20 +1030,17 @@ static int list_events(const char *channel_name)
 		goto error;
 	}
 
-	if (opt_xml) { 
-	} else {
-		MSG("\n%sEvents:", indent4);
-		if (count == 0) {
-			MSG("%sNone\n", indent6);
-			goto end;
-		}
-
-		for (i = 0; i < count; i++) {
-			print_events(&events[i]);
-		}
-
-		MSG("");
+	MSG("\n%sEvents:", indent4);
+	if (count == 0) {
+		MSG("%sNone\n", indent6);
+		goto end;
 	}
+
+	for (i = 0; i < count; i++) {
+		print_events(&events[i]);
+	}
+
+	MSG("");
 
 end:
 	free(events);
@@ -1299,14 +1325,13 @@ int cmd_list(int argc, const char **argv)
 	if (session_name == NULL) {
 		if (!opt_kernel && !opt_userspace && !opt_jul) {
 			ret = list_sessions(NULL);
-			if (ret != 0) {
+			if (ret) {
 				goto end;
 			}
 		}
 		if (opt_kernel) {
 			ret = list_kernel_events(mi_writer);
-			if (ret < 0) {
-				ret = CMD_ERROR;
+			if (ret) {
 				goto end;
 			}
 		}
@@ -1323,8 +1348,7 @@ int cmd_list(int argc, const char **argv)
 		}
 		if (opt_jul) {
 			ret = list_jul_events(mi_writer);
-			if (ret < 0) {
-				ret = CMD_ERROR;
+			if (ret) {
 				goto end;
 			}
 		}
@@ -1404,11 +1428,12 @@ int cmd_list(int argc, const char **argv)
 		}
 	}
 
+
+	ret = mi_writer_command_close(mi_writer);
+
 end:
-	if (opt_xml) {
+	if ( mi_writer && mi_writer_destroy(mi_writer)) {
 		/* Preserve original error code */
-		ret = mi_writer_command_close(mi_writer);
-		mi_writer_destroy(mi_writer);
 		ret = ret ? ret : LTTNG_ERR_MI_IO_FAIL;
 	}
 

@@ -24,7 +24,7 @@ const char * const mi_element_command;
 const char * const mi_element_command_version;
 const char * const mi_element_command_list;
 
-/* Strings related to command: version */
+/* Strings related to command: versioni */
 const char * const mi_element_version_str;
 const char * const mi_element_version_web;
 const char * const mi_element_version_name;
@@ -34,7 +34,9 @@ const char * const mi_element_version_license;
 const char * const mi_element_version_patch_level;
 const char * const mi_element_version_description;
 
-// Strings related to command: list -k (kernel)
+/* Strings related to command: list -k (kernel) */
+const char * const mi_element_list_event;
+const char * const mi_element_list_events;
 const char * const mi_element_list_kernel_event_tracepoint;
 const char * const mi_element_list_kernel_event_function;
 const char * const mi_element_list_kernel_event_probe;
