@@ -19,12 +19,12 @@
 #ifndef MI_INTERNAL_H
 #define MI_INTERNAL_H
 
-// Strings related to command
+/* Strings related to command */
 const char * const mi_element_command;
 const char * const mi_element_command_version;
 const char * const mi_element_command_list;
 
-// Strings related to command: version
+/* Strings related to command: version */
 const char * const mi_element_version_str;
 const char * const mi_element_version_web;
 const char * const mi_element_version_name;
@@ -58,7 +58,7 @@ const char * const mi_element_list_event_offset;
 const char * const mi_element_list_event_symbol;
 
 
-// Strings related to command: list -u (userspace)
+/* Strings related to command: list -u (userspace) */
 const char * const mi_element_list_ust_jul_events;
 const char * const mi_element_list_ust_curr_pid;
 const char * const mi_element_list_ust_cmdline;

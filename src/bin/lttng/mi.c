@@ -35,14 +35,16 @@ const char * const mi_element_version_license                   = "license";
 const char * const mi_element_version_patch_level               = "patchLevel";
 const char * const mi_element_version_description               = "description";
 
-/* Strings related to command: list */
-const char * const mi_element_list_kernel_event_tracepoint      = "LTTNG_EVENT_TRACEPOINT";
-const char * const mi_element_list_kernel_event_function        = "LTTNG_EVENT_FUNCTION";
-const char * const mi_element_list_kernel_event_probe           = "LTTNG_EVENT_PROBE";
-const char * const mi_element_list_kernel_event_function_entry  = "LTTNG_EVENT_FUNCTION_ENTRY";
-const char * const mi_element_list_kernel_event_syscall         = "LTTNG_EVENT_SYSCALL";
-const char * const mi_element_list_kernel_event_noop            = "LTTNG_EVENT_NOOP";
-const char * const mi_element_list_kernel_event_all             = "LTTNG_EVENT_ALL";
+/* Strings related to command: list  */
+const char * const mi_element_list_event                        = "event";
+const char * const mi_element_list_events                       = "events";
+const char * const mi_element_list_kernel_event_tracepoint      = "TRACEPOINT";
+const char * const mi_element_list_kernel_event_function        = "FUNCTION";
+const char * const mi_element_list_kernel_event_probe           = "PROBE";
+const char * const mi_element_list_kernel_event_function_entry  = "FUNCTION_ENTRY";
+const char * const mi_element_list_kernel_event_syscall         = "SYSCALL";
+const char * const mi_element_list_kernel_event_noop            = "NOOP";
+const char * const mi_element_list_kernel_event_all             = "ALL";
 const char * const mi_element_list_event_type                   = "type";
 const char * const mi_element_list_event_name                   = "name";
 const char * const mi_element_list_loglevel_type                = "loglevel_type";
