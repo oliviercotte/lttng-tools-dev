@@ -342,7 +342,12 @@ static int mi_print_event_tracepoint_loglevel(mi_writer *writer, struct lttng_ev
 {
 	int ret;
         
-	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
+        ret = mi_writer_open_element(writer, mi_element_list_event_flag);
+        if (ret) {
+		goto end;
+	}
+        
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_kernel_event_tracepoint);
 	if (ret) {
 		goto end;
 	}
@@ -388,7 +393,7 @@ static int mi_print_event_tracepoint_loglevel(mi_writer *writer, struct lttng_ev
 	}
 
 	ret = mi_writer_write_element_string(writer, mi_element_list_event_filter_str, filter_string(event->filter));
-
+        
 end:
 	return ret;
 }
@@ -396,7 +401,13 @@ end:
 static int mi_print_event_tracepoint_no_loglevel(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
+        
+        ret = mi_writer_open_element(writer, mi_element_list_event_flag);
+        if (ret) {
+		goto end;
+	}
+        
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_kernel_event_tracepoint);
 	if (ret) {
 		goto end;
 	}
@@ -437,11 +448,16 @@ end:
 	return ret;
 }
 
-static int mi_print_event_function_probe(mi_writer *writer, struct lttng_event *event,
-		const char * const mi_element)
+static int mi_print_event_function_probe(mi_writer *writer, struct lttng_event *event, const char* const mi_element)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element);
+        
+        ret = mi_writer_open_element(writer, mi_element_list_event_flag);
+        if (ret) {
+		goto end;
+	}
+        
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element);
 	if (ret) {
 		goto end;
 	}
@@ -488,7 +504,13 @@ end:
 static int mi_print_event_function_entry(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_function_entry);
+        
+        ret = mi_writer_open_element(writer, mi_element_list_event_flag);
+        if (ret) {
+		goto end;
+	}
+        
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element_list_kernel_event_function_entry);
 	if (ret) {
 		goto end;
 	}
@@ -524,11 +546,16 @@ end:
 	return ret;
 }
 
-static int mi_print_event_syscall_noop(mi_writer *writer, struct lttng_event *event,
-		const char * const mi_element)
+static int mi_print_event_syscall_noop(mi_writer *writer, struct lttng_event *event, const char* const mi_element)
 {
 	int ret;
-	ret = mi_writer_open_element(writer, mi_element);
+        
+	ret = mi_writer_open_element(writer, mi_element_list_event_flag);
+        if (ret) {
+		goto end;
+	}
+        
+	ret = mi_writer_write_element_string(writer, mi_element_list_event_type, mi_element);
 	if (ret) {
 		goto end;
 	}
@@ -909,6 +936,11 @@ static int list_kernel_events(mi_writer *writer)
 	}
 
 	if(writer && opt_xml) {
+                ret = mi_writer_open_element(writer, mi_element_list_events_flag);
+                if (ret) {
+                        goto error_xml;
+		}
+                
 		for (i = 0; i < size; i++) {
 			ret = mi_print_event(writer, &event_list[i]);
 			if (ret) {
@@ -918,6 +950,11 @@ static int list_kernel_events(mi_writer *writer)
 			if (ret) {
 				goto error_xml;
 			}
+		}
+                
+                ret = mi_writer_close_element(writer);
+                if (ret) {
+                        goto error_xml;
 		}
 	} else {
 		MSG("Kernel events:\n-------------");

@@ -42,6 +42,8 @@ const char * const mi_element_list_kernel_event_function_entry;
 const char * const mi_element_list_kernel_event_syscall;
 const char * const mi_element_list_kernel_event_noop;
 const char * const mi_element_list_kernel_event_all;
+const char * const mi_element_list_events_flag;
+const char * const mi_element_list_event_flag;
 const char * const mi_element_list_event_type;
 const char * const mi_element_list_event_name;
 const char * const mi_element_list_loglevel_type;
