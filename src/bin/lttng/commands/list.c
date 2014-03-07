@@ -882,7 +882,7 @@ error:
  */
 static int list_kernel_events(mi_writer *writer)
 {
-	int i, size, ret;
+	int i, size, ret = CMD_SUCCESS;
 	struct lttng_domain domain;
 	struct lttng_handle *handle;
 	struct lttng_event *event_list;
@@ -909,11 +909,11 @@ static int list_kernel_events(mi_writer *writer)
 		for (i = 0; i < size; i++) {
 			ret = mi_print_events(writer, &event_list[i]);
 			if (ret) {
-				goto error;
+				goto error_xml;
 			}
 			ret = mi_writer_close_element(writer);
 			if (ret) {
-				goto error;
+				goto error_xml;
 			}
 		}
 	} else {
@@ -926,10 +926,11 @@ static int list_kernel_events(mi_writer *writer)
 		MSG("");
 	}
 
+error_xml:
 	free(event_list);
 
 	lttng_destroy_handle(handle);
-	return CMD_SUCCESS;
+	return ret;
 
 error:
 	lttng_destroy_handle(handle);
