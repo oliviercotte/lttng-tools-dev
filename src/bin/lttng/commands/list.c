@@ -651,7 +651,7 @@ error:
 	return ret;
 }
 
-static int list_jul_events(mi_writer *mi_writer)
+static int list_jul_events(mi_writer *writer)
 {
 	int i, size, ret;
 	struct lttng_domain domain;
@@ -677,9 +677,9 @@ static int list_jul_events(mi_writer *mi_writer)
 		return size;
 	}
 
-	if (mi_writer && opt_xml) {
+	if (writer && opt_xml) {
 		for (i = 0; i < size; i++) {
-			ret = mi_writer_command_open(mi_writer, mi_element_list_ust_jul_events);
+			ret = mi_writer_command_open(writer, mi_element_list_ust_jul_events);
 			if (ret) {
 				goto error;
 			}
@@ -687,19 +687,19 @@ static int list_jul_events(mi_writer *mi_writer)
 			if (cur_pid != event_list[i].pid) {
 				cur_pid = event_list[i].pid;
 				cmdline = get_cmdline_by_pid(cur_pid);
-				ret = mi_print_pid_name(mi_writer, cur_pid, cmdline);
+				ret = mi_print_pid_name(writer, cur_pid, cmdline);
 				free(cmdline);
 				if (ret) {
 					goto error;
 				}
 			}
 
-			ret = mi_writer_write_element_string(mi_writer, mi_element_list_event_name, event_list[i].name);
+			ret = mi_writer_write_element_string(writer, mi_element_list_event_name, event_list[i].name);
 			if (ret) {
 				goto error;
 			}
 
-			ret = mi_writer_close_element(mi_writer);
+			ret = mi_writer_close_element(writer);
 			if (ret) {
 				goto error;
 			}
@@ -736,7 +736,7 @@ error:
 /*
  * Ask session daemon for all user space tracepoints available.
  */
-static int list_ust_events(mi_writer *mi_writer)
+static int list_ust_events(mi_writer *writer)
 {
 	int i, size, ret;
 	struct lttng_domain domain;
@@ -763,9 +763,9 @@ static int list_ust_events(mi_writer *mi_writer)
 		return size;
 	}
 
-	if (mi_writer && opt_xml) {
+	if (writer && opt_xml) {
 		for (i = 0; i < size; i++) {
-			ret = mi_print_events(mi_writer, &event_list[i]);
+			ret = mi_print_events(writer, &event_list[i]);
 			if (ret) {
 				goto error;
 			}
@@ -773,14 +773,14 @@ static int list_ust_events(mi_writer *mi_writer)
 			if (cur_pid != event_list[i].pid) {
 				cur_pid = event_list[i].pid;
 				cmdline = get_cmdline_by_pid(cur_pid);
-				ret = mi_print_pid_name(mi_writer, cur_pid, cmdline);
+				ret = mi_print_pid_name(writer, cur_pid, cmdline);
 				free(cmdline);
 				if (ret) {
 					goto error;
 				}
 			}
 
-			ret = mi_writer_close_element(mi_writer);
+			ret = mi_writer_close_element(writer);
 			if (ret) {
 				goto error;
 			}
@@ -887,7 +887,7 @@ error:
 /*
  * Ask for all trace events in the kernel and pretty print them.
  */
-static int list_kernel_events(mi_writer *mi_writer)
+static int list_kernel_events(mi_writer *writer)
 {
 	int i, size, ret;
 	struct lttng_domain domain;
@@ -912,13 +912,13 @@ static int list_kernel_events(mi_writer *mi_writer)
 		return size;
 	}
 
-	if(mi_writer && opt_xml) {
+	if(writer && opt_xml) {
 		for (i = 0; i < size; i++) {
-			ret = mi_print_events(mi_writer, &event_list[i]);
+			ret = mi_print_events(writer, &event_list[i]);
 			if (ret) {
 				goto error;
 			}
-			ret = mi_writer_close_element(mi_writer);
+			ret = mi_writer_close_element(writer);
 			if (ret) {
 				goto error;
 			}
@@ -948,7 +948,7 @@ error:
  *
  * Return CMD_SUCCESS on success else a negative value.
  */
-static int list_session_jul_events(mi_writer *mi_writer)
+static int list_session_jul_events(mi_writer *writer)
 {
 	int ret, count, i;
 	struct lttng_event *events = NULL;
@@ -962,7 +962,7 @@ static int list_session_jul_events(mi_writer *mi_writer)
 
 	if (opt_xml) {
 		for (i = 0; i < count; i++) {
-			ret = mi_print_jul_event(mi_writer, &events[i]);
+			ret = mi_print_jul_event(writer, &events[i]);
 			if (ret) {
 				goto error;
 			}
@@ -1233,7 +1233,7 @@ int cmd_list(int argc, const char **argv)
 	static poptContext pc;
 	struct lttng_domain domain;
 	struct lttng_domain *domains = NULL;
-	mi_writer *mi_writer = NULL;
+	mi_writer *writer = NULL;
 
 	memset(&domain, 0, sizeof(domain));
 
@@ -1265,13 +1265,13 @@ int cmd_list(int argc, const char **argv)
 	}
 
 	if(opt_xml) {
-		mi_writer = mi_writer_create(fileno(stdout));
-		if (!mi_writer) {
+		writer = mi_writer_create(fileno(stdout));
+		if (!writer) {
 			ret = LTTNG_ERR_NOMEM;
 			goto end;
 		}
 
-		ret = mi_writer_command_open(mi_writer, mi_element_command_list);
+		ret = mi_writer_command_open(writer, mi_element_command_list);
 		if (ret) {
 			goto end;
 		}
@@ -1307,7 +1307,7 @@ int cmd_list(int argc, const char **argv)
 			}
 		}
 		if (opt_kernel) {
-			ret = list_kernel_events(mi_writer);
+			ret = list_kernel_events(writer);
 			if (ret < 0) {
 				ret = CMD_ERROR;
 				goto end;
@@ -1317,7 +1317,7 @@ int cmd_list(int argc, const char **argv)
 			if (opt_fields) {
 				ret = list_ust_event_fields();
 			} else {
-				ret = list_ust_events(mi_writer);
+				ret = list_ust_events(writer);
 			}
 			if (ret < 0) {
 				ret = CMD_ERROR;
@@ -1325,7 +1325,7 @@ int cmd_list(int argc, const char **argv)
 			}
 		}
 		if (opt_jul) {
-			ret = list_jul_events(mi_writer);
+			ret = list_jul_events(writer);
 			if (ret < 0) {
 				ret = CMD_ERROR;
 				goto end;
@@ -1392,7 +1392,7 @@ int cmd_list(int argc, const char **argv)
 				}
 
 				if (domains[i].type == LTTNG_DOMAIN_JUL) {
-					ret = list_session_jul_events(mi_writer);
+					ret = list_session_jul_events(writer);
 					if (ret < 0) {
 						goto end;
 					}
@@ -1407,11 +1407,10 @@ int cmd_list(int argc, const char **argv)
 		}
 	}
 
+        ret = mi_writer_command_close(writer);
 end:
-	if (opt_xml) {
+	if (writer && mi_writer_destroy(writer)) {
 		/* Preserve original error code */
-		ret = mi_writer_command_close(mi_writer);
-		mi_writer_destroy(mi_writer);
 		ret = ret ? ret : LTTNG_ERR_MI_IO_FAIL;
 	}
 
