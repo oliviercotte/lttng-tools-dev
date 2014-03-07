@@ -338,9 +338,10 @@ end:
 	return ret;
 }
 
-static int mi_print_events_tracepoint_loglevel(mi_writer *writer, struct lttng_event *event)
+static int mi_print_event_tracepoint_loglevel(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
+        
 	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
 	if (ret) {
 		goto end;
@@ -392,7 +393,7 @@ end:
 	return ret;
 }
 
-static int mi_print_events_tracepoint_no_loglevel(mi_writer *writer, struct lttng_event *event)
+static int mi_print_event_tracepoint_no_loglevel(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
 	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_tracepoint);
@@ -436,7 +437,7 @@ end:
 	return ret;
 }
 
-static int mi_print_events_function_probe(mi_writer *writer, struct lttng_event *event,
+static int mi_print_event_function_probe(mi_writer *writer, struct lttng_event *event,
 		const char * const mi_element)
 {
 	int ret;
@@ -484,7 +485,7 @@ end:
 	return ret;
 }
 
-static int mi_print_events_function_entry(mi_writer *writer, struct lttng_event *event)
+static int mi_print_event_function_entry(mi_writer *writer, struct lttng_event *event)
 {
 	int ret;
 	ret = mi_writer_open_element(writer, mi_element_list_kernel_event_function_entry);
@@ -523,7 +524,7 @@ end:
 	return ret;
 }
 
-static int mi_print_events_syscall_noop(mi_writer *writer, struct lttng_event *event,
+static int mi_print_event_syscall_noop(mi_writer *writer, struct lttng_event *event,
 		const char * const mi_element)
 {
 	int ret;
@@ -582,7 +583,7 @@ error:
 	return ret;
 }
 
-static int mi_print_events(mi_writer *writer, struct lttng_event *event)
+static int mi_print_event(mi_writer *writer, struct lttng_event *event)
 {
 	int ret = 0;
 
@@ -591,12 +592,12 @@ static int mi_print_events(mi_writer *writer, struct lttng_event *event)
 			case LTTNG_EVENT_TRACEPOINT:
 				{
 					if (event->loglevel != -1) {
-						ret = mi_print_events_tracepoint_loglevel(writer, event);
+						ret = mi_print_event_tracepoint_loglevel(writer, event);
 						if (ret) {
 							goto error;
 						}
 					} else {
-						ret = mi_print_events_tracepoint_no_loglevel(writer, event);
+						ret = mi_print_event_tracepoint_no_loglevel(writer, event);
 						if (ret) {
 							goto error;
 						}
@@ -604,31 +605,31 @@ static int mi_print_events(mi_writer *writer, struct lttng_event *event)
 					break;
 				}
 			case LTTNG_EVENT_FUNCTION:
-				ret = mi_print_events_function_probe(writer, event, mi_element_list_kernel_event_function);
+				ret = mi_print_event_function_probe(writer, event, mi_element_list_kernel_event_function);
 				if (ret) {
 					goto error;
 				}
 				break;
 			case LTTNG_EVENT_PROBE:
-				ret = mi_print_events_function_probe(writer, event, mi_element_list_kernel_event_probe);
+				ret = mi_print_event_function_probe(writer, event, mi_element_list_kernel_event_probe);
 				if (ret) {
 					goto error;
 				}
 				break;
 			case LTTNG_EVENT_FUNCTION_ENTRY:
-				ret = mi_print_events_function_entry(writer, event);
+				ret = mi_print_event_function_entry(writer, event);
 				if (ret) {
 					goto error;
 				}
 				break;
 			case LTTNG_EVENT_SYSCALL:
-				ret = mi_print_events_syscall_noop(writer, event, mi_element_list_kernel_event_syscall);
+				ret = mi_print_event_syscall_noop(writer, event, mi_element_list_kernel_event_syscall);
 				if (ret) {
 					goto error;
 				}
 				break;
 			case LTTNG_EVENT_NOOP:
-				ret = mi_print_events_syscall_noop(writer, event, mi_element_list_kernel_event_noop);
+				ret = mi_print_event_syscall_noop(writer, event, mi_element_list_kernel_event_noop);
 				if (ret) {
 					goto error;
 				}
@@ -638,7 +639,9 @@ static int mi_print_events(mi_writer *writer, struct lttng_event *event)
 				assert(0);
 				break;
 		}
-	}
+        } else {
+            ret = LTTNG_ERR_MI_IO_FAIL;
+        }
 
 error:
 	return ret;
@@ -758,7 +761,7 @@ static int list_ust_events(mi_writer *writer)
 
 	if (writer && opt_xml) {
 		for (i = 0; i < size; i++) {
-			ret = mi_print_events(writer, &event_list[i]);
+			ret = mi_print_event(writer, &event_list[i]);
 			if (ret) {
 				goto error;
 			}
@@ -907,7 +910,7 @@ static int list_kernel_events(mi_writer *writer)
 
 	if(writer && opt_xml) {
 		for (i = 0; i < size; i++) {
-			ret = mi_print_events(writer, &event_list[i]);
+			ret = mi_print_event(writer, &event_list[i]);
 			if (ret) {
 				goto error_xml;
 			}
